@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AutoPremium — Secure Sign In",
+  title: "VIBES — Secure Sign In",
   description: "Access your premium automotive dashboard",
 };
 
