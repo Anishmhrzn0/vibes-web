@@ -48,6 +48,8 @@ export async function POST(req: NextRequest) {
         fullName:  user.fullName,
         email:     user.email,
         phone:     user.phone,
+        bio:       user.bio,  
+        avatar:    user.avatar, 
         createdAt: user.createdAt,
       },
     }, { status: 201 });

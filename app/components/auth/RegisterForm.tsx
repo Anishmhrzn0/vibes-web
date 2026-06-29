@@ -103,7 +103,7 @@ function RegistrationStep({ onNext }: { onNext: (phone: string) => void }) {
         </button>
       </form>
 
-      <p className={s.authPrompt}>Already have an account? <Link href="/auth/login">Sign in</Link></p>
+      <p className={s.authPrompt}>Already have an account? <Link href="/login">Sign in</Link></p>
     </>
   );
 }
@@ -152,7 +152,7 @@ function PinStep({ phone, onBack }: { phone: string; onBack: () => void }) {
         <button type="button" className={s.backButton} onClick={onBack}>← Go back and edit details</button>
       </form>
 
-      <p className={s.authPrompt}>Already have an account? <Link href="/auth/login">Sign in</Link></p>
+      <p className={s.authPrompt}>Already have an account? <Link href="/login">Sign in</Link></p>
     </>
   );
 }

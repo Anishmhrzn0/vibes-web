@@ -1,68 +1,53 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { getSession, logoutAction } from '@/app/lib/actions/auth.actions';
-import styles from './dashboard.module.css';
+"use client";
+import Link from "next/link";
+import { useAuth } from "../context/AuthContext";
+import { useProtectedRoute } from "../router/protected.route";
 
-export default async function DashboardPage() {
-  const session = await getSession();
-  if (!session) redirect('/auth/login');
+export default function DashboardPage() {
+  const { loading } = useProtectedRoute(); 
+  const { user, logout } = useAuth();
 
-  const { user } = session;
-  const initials = user.fullName
-    .split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-  const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  });
+  if (loading || !user) return null; 
 
   return (
-    <div className={styles.page}>
-
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.navLogo}>VIBES</Link>
-        <form action={logoutAction}>
-          <button type="submit" className={styles.logoutBtn}>Sign out</button>
-        </form>
+    <div className="dashboard-page">
+      <nav className="navbar">
+        <div className="nav-brand"> VIBES</div>
+        <div className="nav-links">
+          <Link href="/profile/edit" className="nav-link">Edit Profile</Link>
+          <Link href="/profile/password" className="nav-link">Change Password</Link>
+          <button className="btn-logout" onClick={logout}>Logout</button>
+        </div>
       </nav>
 
-      <main className={styles.main}>
-
-        <div className={styles.hero}>
-          <div className={styles.avatar}>{initials}</div>
-          <div>
-            <h1 className={styles.welcomeTitle}>Welcome back, {user.fullName.split(' ')[0]}.</h1>
-            <p className={styles.welcomeSub}>Here&apos;s your account overview.</p>
+      <div className="dashboard-content">
+        <div className="welcome-card">
+          <div className="avatar-large">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.fullName} />
+            ) : (
+              <span>{user.fullName?.charAt(0).toUpperCase()}</span>
+            )}
           </div>
+          <h1>Hello, {user.fullName}! 👋</h1>
+          <p>{user.email}</p>
+          {user.bio && <p className="bio">{user.bio}</p>}
+          {user.phone && <p className="phone"> {user.phone}</p>}
         </div>
 
-        <div className={styles.grid}>
-          {[
-            { label: 'Full name',    value: user.fullName },
-            { label: 'Email',        value: user.email    },
-            { label: 'Phone',        value: user.phone    },
-            { label: 'Member since', value: memberSince   },
-          ].map(({ label, value }) => (
-            <div key={label} className={styles.infoCard}>
-              <span className={styles.infoLabel}>{label}</span>
-              <span className={styles.infoValue}>{value}</span>
-            </div>
-          ))}
+        <div className="quick-actions">
+          <Link href="/profile/edit" className="action-card">
+            <span className="action-icon"></span>
+            <h3>Edit Profile</h3>
+            <p>Update your fullName, bio, avatar and more</p>
+          </Link>
+          <Link href="/profile/password" className="action-card">
+            <span className="action-icon"></span>
+            <h3>Change Password</h3>
+            <p>Keep your account secure</p>
+          </Link>
         </div>
-
-        <div className={styles.actionsSection}>
-          <h2 className={styles.sectionTitle}>Quick actions</h2>
-          <div className={styles.actions}>
-            {['Browse Inventory', 'List a Vehicle', 'Apply for Financing', 'Contact Concierge'].map(action => (
-              <button key={action} className={styles.actionBtn}>{action}</button>
-            ))}
-          </div>
-        </div>
-
-      </main>
+      </div>
     </div>
   );
 }

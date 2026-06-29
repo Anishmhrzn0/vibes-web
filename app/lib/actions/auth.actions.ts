@@ -2,8 +2,10 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { registerApi, loginApi } from '@/app/lib/api/auth';
+import { registerApi, loginApi, updateProfile, updatePassword } from '@/app/lib/api/auth';
 import type { RegisterSchema, LoginSchema } from '@/app/lib/schemas/auth.schema';
+import { revalidatePath } from 'next/cache';
+import { UpdatePasswordFormData } from '@/app/components/auth/schema';
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -18,7 +20,6 @@ export async function registerAction(payload: RegisterSchema) {
   const cookieStore = await cookies();
   cookieStore.set('ap_token', accessToken, COOKIE_OPTS);
   cookieStore.set('ap_user', JSON.stringify(user), { ...COOKIE_OPTS, httpOnly: false });
-  redirect('/dashboard');
 }
 
 export async function loginAction(payload: LoginSchema) {
@@ -26,14 +27,41 @@ export async function loginAction(payload: LoginSchema) {
   const cookieStore = await cookies();
   cookieStore.set('ap_token', accessToken, COOKIE_OPTS);
   cookieStore.set('ap_user', JSON.stringify(user), { ...COOKIE_OPTS, httpOnly: false });
-  redirect('/dashboard');
+}
+
+export const handleUpdateProfile = async (formData: FormData) => {
+    try {
+        const result = await updateProfile(formData);
+        if (result.success) {
+            await revalidatePath("/dashboard/profile"); // Revalidate the profile page after successful update
+            return { success: true, message: result.message, data: result.data };
+        }
+        else {
+            return { success: false, message: result.message || 'Failed to update profile' };
+        }
+    } catch (error: Error | any) {
+        return { success: false, message: error?.message || 'Failed to update profile' };
+    }
+}
+
+export const handleUpdatePassword = async (data: UpdatePasswordFormData) => {
+    try {
+        const result = await updatePassword(data);
+        if (result.success) {
+            return { success: true, message: result.message, data: result.data };
+        } else {
+            return { success: false, message: result.message || 'Failed to update password' };
+        }
+    } catch (error: Error | any) {
+        return { success: false, message: error?.message || 'Failed to update password' };
+    }
 }
 
 export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete('ap_token');
   cookieStore.delete('ap_user');
-  redirect('/auth/login');
+  redirect('/login');
 }
 
 export async function getSession() {

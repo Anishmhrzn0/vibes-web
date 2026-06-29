@@ -10,6 +10,8 @@ import { loginSchema, type LoginSchema } from '@/app/lib/schemas/auth.schema';
 import { loginAction } from '@/app/lib/actions/auth.actions';
 import { FieldError } from './FieldError';
 import s from './auth.module.css';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/lib/hooks/useauth';
 
 const NAV_LINKS    = ['Inventory', 'Sell', 'Financing', 'Concierge'] as const;
 const FOOTER_LINKS = ['Privacy Policy', 'Terms of Service', 'Verified Seller Program', 'Support'] as const;
@@ -22,6 +24,8 @@ const TRUST_BADGES = [
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError]   = useState<string | null>(null);
+  const router = useRouter();
+  const { setUser } = useAuth();
 
   const {
     register,
@@ -35,6 +39,15 @@ export function LoginForm() {
     setServerError(null);
     try {
       await loginAction(data);
+    const match = document.cookie
+        .split('; ')
+        .find(r => r.startsWith('ap_user='));
+      if (match) {
+        const user = JSON.parse(decodeURIComponent(match.split('=')[1]));
+        setUser(user);
+      }
+
+      router.push('/dashboard');       
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Login failed');
     }
@@ -99,7 +112,7 @@ export function LoginForm() {
           </form>
 
           <p className={s.authPrompt}>
-            Don&apos;t have an account? <Link href="/auth/register">Create one</Link>
+            Don&apos;t have an account? <Link href="/register">Create one</Link>
           </p>
         </div>
 
