@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
         email:     user.email,
         phone:     user.phone,
         bio:       user.bio,  
-        avatar:    user.avatar, 
+        avatar:    user.avatar,
+        role:      user.role, 
         createdAt: user.createdAt,
       },
     }, { status: 201 });

@@ -14,6 +14,9 @@ export default function DashboardPage() {
       <nav className="navbar">
         <div className="nav-brand"> VIBES</div>
         <div className="nav-links">
+          {user.role === "admin" && (
+  <Link href="/admin/users" className="nav-link">Admin Panel</Link>
+)}
           <Link href="/profile/edit" className="nav-link">Edit Profile</Link>
           <Link href="/profile/password" className="nav-link">Change Password</Link>
           <button className="btn-logout" onClick={logout}>Logout</button>
