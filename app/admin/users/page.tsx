@@ -172,7 +172,7 @@ export default function AdminUsersPage() {
                         {u.avatar ? (
                           <img src={u.avatar} alt={u.fullName ?? 'User'} />
                         ) : (
-                          <span>{u.fullName?.charAt(0).toUpperCase() ?? '?'}</span>
+                          <span>{u.fullName?.charAt(0).toUpperCase() ?? "?"}</span>
                         )}?
                       </div>
                       <span>{u.fullName}</span>

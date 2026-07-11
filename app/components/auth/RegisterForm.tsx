@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/context/AuthContext';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -20,7 +22,6 @@ const TRUST_BADGES = [
 ] as const;
 
 const COUNTRY = { dial: '+977', flag: '🇳🇵' };
-
 type Step = 'form' | 'pin';
 
 // ─── Step 1 ───────────────────────────────────────────────────────────────────
@@ -28,6 +29,8 @@ type Step = 'form' | 'pin';
 function RegistrationStep({ onNext }: { onNext: (phone: string) => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError]   = useState<string | null>(null);
+  const router = useRouter();
+  const { setUser } = useAuth();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } =
     useForm<RegisterSchema>({ resolver: zodResolver(registerSchema) });
@@ -36,7 +39,16 @@ function RegistrationStep({ onNext }: { onNext: (phone: string) => void }) {
     setServerError(null);
     try {
       await registerAction(data);
-      onNext(data.phone);
+
+      const match = document.cookie
+        .split('; ')
+        .find(r => r.startsWith('ap_user='));
+      if (match) {
+        const user = JSON.parse(decodeURIComponent(match.split('=')[1]));
+        setUser(user);
+      }
+
+      router.push('/');
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Registration failed');
     }
@@ -55,7 +67,6 @@ function RegistrationStep({ onNext }: { onNext: (phone: string) => void }) {
       {serverError && <p className={s.serverError}>{serverError}</p>}
 
       <form className={s.form} onSubmit={handleSubmit(onSubmit)} noValidate>
-
         <div className={s.field}>
           <label className={s.label} htmlFor="fullName">Full name</label>
           <input id="fullName" type="text" placeholder="Aarav Sharma" autoComplete="name"
@@ -106,11 +117,12 @@ function RegistrationStep({ onNext }: { onNext: (phone: string) => void }) {
       <p className={s.authPrompt}>Already have an account? <Link href="/login">Sign in</Link></p>
     </>
   );
-}
+}  
 
 // ─── Step 2 ───────────────────────────────────────────────────────────────────
 
 function PinStep({ phone, onBack }: { phone: string; onBack: () => void }) {
+  const router = useRouter();
   const [pin, setPin]           = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
   const [loading, setLoading]   = useState(false);
@@ -122,6 +134,7 @@ function PinStep({ phone, onBack }: { phone: string; onBack: () => void }) {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1000));
     setLoading(false);
+    router.push('/');
   }
 
   const masked = `${'•'.repeat(Math.max(0, phone.length - 3))}${phone.slice(-3)}`;
@@ -155,9 +168,9 @@ function PinStep({ phone, onBack }: { phone: string; onBack: () => void }) {
       <p className={s.authPrompt}>Already have an account? <Link href="/login">Sign in</Link></p>
     </>
   );
-}
+}  
 
-// ─── RegisterForm ─────────────────────────────────────────────────────────────
+//─── RegisterForm ─────────────────────────────────────────────────────────────
 
 export function RegisterForm() {
   const [step, setStep]   = useState<Step>('form');
@@ -165,7 +178,6 @@ export function RegisterForm() {
 
   return (
     <div className={s.page}>
-
       <nav className={s.nav}>
         <Link href="/" className={s.navLogo}>VIBES</Link>
         <ul className={s.navLinks}>
@@ -196,7 +208,6 @@ export function RegisterForm() {
         </ul>
         <span className={s.footerCopy}>© 2024 VIBES. Precision. Transparency. Authority.</span>
       </footer>
-
     </div>
   );
 }

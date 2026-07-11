@@ -59,9 +59,9 @@ export const adminUsersApi = {
   },
 
   get: (id: string) =>
-    fetch(`/api/admin/users/${id}`).then((res) =>
-      handle<{ success: boolean; data: AdminUser }>(res)
-    ),
+  fetch(`/api/admin/users?id=${id}`).then((res) =>
+    handle<{ success: boolean; data: AdminUser }>(res)
+  ),
 
   create: (payload: CreateUserPayload) =>
     fetch("/api/admin/users", {
@@ -71,14 +71,14 @@ export const adminUsersApi = {
     }).then((res) => handle<{ success: boolean; data: AdminUser }>(res)),
 
   update: (id: string, payload: UpdateUserPayload) =>
-    fetch(`/api/admin/users/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }).then((res) => handle<{ success: boolean; data: AdminUser }>(res)),
+  fetch(`/api/admin/users?id=${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).then((res) => handle<{ success: boolean; data: AdminUser }>(res)),
 
   remove: (id: string) =>
-    fetch(`/api/admin/users/${id}`, { method: "DELETE" }).then((res) =>
-      handle<{ success: boolean; message: string }>(res)
-    ),
+  fetch(`/api/admin/users?id=${id}`, { method: "DELETE" }).then((res) =>
+    handle<{ success: boolean; message: string }>(res)
+  ),
 };

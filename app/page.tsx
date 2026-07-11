@@ -1,5 +1,265 @@
-import { redirect } from 'next/navigation';
+"use client";
+import Link from "next/link";
+import { useAuth } from "@/app/context/AuthContext";
+import s from "./home.module.css";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+
+
+// ── Data ─────────────────────────────────────────────────────────────────────
+
+const CATEGORIES = [
+  {
+    name: "Sedans",
+    sub: "Luxury & Efficiency",
+    tall: true,
+    img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&q=80",
+  },
+  {
+    name: "SUVs",
+    sub: "Power & Versatility",
+    tall: false,
+    img: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&q=80",
+  },
+  {
+    name: "Trucks",
+    sub: "Capability & Muscle",
+    tall: false,
+    img: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&q=80",
+  },
+];
+
+const CARS = [
+  {
+    name: "2023 Porsche 911",
+    specs: "5,480 Miles · Automatic · Gasoline",
+    price: "Rs.10,480,500",
+    badge: "Instant Buy",
+    badgeType: "green",
+    img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&q=80",
+  },
+  {
+    name: "2024 Audi Q8 e-tron",
+    specs: "51 Miles · Electric · AWD",
+    price: "Rs.10,480,500",
+    badge: "Certified",
+    badgeType: "blue",
+    img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80",
+  },
+  {
+    name: "2022 BMW M8",
+    specs: "16,880 Miles · Automatic · Gasoline",
+    price: "Rs.10,480,500",
+    badge: "Featured",
+    badgeType: "amber",
+    img: "https://images.unsplash.com/photo-1555652736-e92021d28a10?w=600&q=80",
+  },
+];
+
+const FOOTER_FEATURES = [
+  {
+    icon: "🛡️",
+    title: "Buyer protection",
+    desc: "Secure payments and comprehensive vehicle inspections on every transaction.",
+  },
+  {
+    icon: "🚚",
+    title: "Fast logistics",
+    desc: "Door-to-door enclosed transport services available nationwide for all purchased vehicles.",
+  },
+  {
+    icon: "💳",
+    title: "Premium financing",
+    desc: "Tailored financial solutions with competitive rates from our network of elite lending partners.",
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
-  redirect('/login');
+  
+  const { user, logout, loading } = useAuth();
+const router = useRouter();
+
+useEffect(() => {
+  if (!loading && !user) {
+    router.replace("/login");
+  }
+}, [user, loading, router]);
+
+if (loading || !user) return null;
+
+  return (
+    <div className={s.page}>
+      {/* ── Navbar ── */}
+      <nav className={s.nav}>
+        <div className={s.navBrand}>VIBES</div>
+        <div className={s.navLinks}>
+          <Link href="/" className={`${s.navLink} ${s.navLinkActive}`}>Buy</Link>
+          <Link href="/sell" className={s.navLink}>Sell</Link>
+        </div>
+        <div className={s.navRight}>
+          <button className={s.iconBtn} aria-label="Notifications">🔔</button>
+          <button className={s.iconBtn} aria-label="Wishlist">🤍</button>
+          {user ? (
+            <button className={s.btnAccount} onClick={logout}>
+              {user.fullName?.split(" ")[0] ?? "Account"}
+            </button>
+          ) : (
+            <Link href="/login" className={s.btnAccount}>Account</Link>
+          )}
+        </div>
+      </nav>
+
+      {/* ── Hero ── */}
+      <section className={s.hero}>
+        <div className={s.heroBg} />
+        <div className={s.heroGlint} />
+        <div className={s.heroOverlay} />
+        <div className={s.heroContent}>
+          <p className={s.heroTag}>Engineering Excellence, Delivered.</p>
+          <h1 className={s.heroTitle}>
+            Discover the most curated selection of verified premium vehicles with 100% transaction security.
+          </h1>
+          <div className={s.heroSearch}>
+            <div className={s.hsInputWrap}>
+              <span className={s.hsIcon}>🔍</span>
+              <input
+                className={s.hsInput}
+                type="text"
+                placeholder="Search make, model, or year"
+              />
+            </div>
+            <div className={s.hsSelectWrap}>
+              <select className={s.hsSelect} aria-label="Body type">
+                <option>All Body Types</option>
+                <option>Sedan</option>
+                <option>SUV</option>
+                <option>Truck</option>
+                <option>Coupe</option>
+                <option>Convertible</option>
+              </select>
+              <span className={s.hsChevron}>▾</span>
+            </div>
+            <button className={s.btnFind}>Find My Vehicle</button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Browse by Category ── */}
+      <section className={s.section}>
+        <div className={s.sectionHeader}>
+          <div>
+            <h2 className={s.sectionTitle}>Browse by category</h2>
+            <p className={s.sectionSub}>Precision engineered vehicles for every journey</p>
+          </div>
+          <Link href="#" className={s.viewAll}>View All →</Link>
+        </div>
+        <div className={s.categoryGrid}>
+          {CATEGORIES.map((cat) => (
+            <div
+              key={cat.name}
+              className={`${s.catCard} ${cat.tall ? s.catTall : ""}`}
+            >
+              <div
+                className={s.catPhoto}
+                style={{ backgroundImage: `url('${cat.img}')` }}
+              >
+                <div className={s.catLabel}>
+                  <div className={s.catName}>{cat.name}</div>
+                  <div className={s.catSub}>{cat.sub}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Featured Instant Buy ── */}
+      <section className={s.featuredSection}>
+        <div className={s.featTop}>
+          <div>
+            <h2 className={s.sectionTitle}>Featured instant buy</h2>
+            <p className={s.sectionSub} style={{ marginBottom: 0 }}>
+              Verified vehicles ready for immediate ownership.
+            </p>
+          </div>
+          <div className={s.carouselBtns}>
+            <button className={s.carouselBtn} aria-label="Previous">‹</button>
+            <button className={s.carouselBtn} aria-label="Next">›</button>
+          </div>
+        </div>
+
+        <div className={s.carsRow}>
+          {CARS.map((car) => (
+            <div key={car.name} className={s.carCard}>
+              <div
+                className={s.carImg}
+                style={{ backgroundImage: `url('${car.img}')` }}
+              >
+                <span className={`${s.carBadge} ${s[`badge_${car.badgeType}`]}`}>
+                  {car.badge}
+                </span>
+                <button className={s.carWish} aria-label="Add to wishlist">🤍</button>
+              </div>
+              <div className={s.carInfo}>
+                <div className={s.carInfoTop}>
+                  <span className={s.carName}>{car.name}</span>
+                  <span className={s.carPrice}>{car.price}</span>
+                </div>
+                <p className={s.carSpecs}>{car.specs}</p>
+                {/* Button hidden by default, revealed on card hover via CSS */}
+                <div className={s.btnBuyWrap}>
+                  <button className={s.btnBuy}>Instant Purchase</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Footer top ── */}
+      <footer>
+        <div className={s.footerMid}>
+          <div>
+            <div className={s.footerBrand}>VIBES</div>
+            <div className={s.footerCopy}>
+              © 2025 VIBES Global Marketplace. All Rights Reserved.
+            </div>
+          </div>
+          <div className={s.footerTrust}>
+            {["Buyer Protection", "Seller Guarantee", "Privacy first", "Terms of Service"].map(
+              (t) => (
+                <div key={t} className={s.trustItem}>{t.replace(" ", "\n")}</div>
+              )
+            )}
+          </div>
+          <div className={s.footerIcons}>
+            <button className={s.iconBtn} aria-label="Settings">⚙️</button>
+            <button className={s.iconBtn} aria-label="Language">🌐</button>
+          </div>
+        </div>
+
+        <div className={s.footerBottom}>
+          <div className={s.footerFeatures}>
+            {FOOTER_FEATURES.map((f) => (
+              <div key={f.title}>
+                <div className={s.featIconWrap}>{f.icon}</div>
+                <div className={s.featTitle}>{f.title}</div>
+                <div className={s.featDesc}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className={s.footerLinks}>
+            {["Privacy Policy", "Terms of Service", "Verified Seller Program", "Support"].map(
+              (l) => (
+                <Link key={l} href="#" className={s.footerLink}>{l}</Link>
+              )
+            )}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }

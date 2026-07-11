@@ -28,11 +28,11 @@ export function UserFormModal({ mode, user, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (mode === "edit" && user) {
       setForm({
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone || "",
+        fullName: user.fullName ?? "",
+        email: user.email ?? "",
+        phone: user.phone ?? "",
         password: "",
-        role: user.role,
+        role: user.role ?? "user",
       });
     } else {
       setForm(emptyForm);
