@@ -32,6 +32,7 @@ const CATEGORIES = [
 
 const CARS = [
   {
+    id: "2023-porsche-911",
     name: "2023 Porsche 911",
     specs: "5,480 Miles · Automatic · Gasoline",
     price: "Rs.10,480,500",
@@ -40,6 +41,7 @@ const CARS = [
     img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&q=80",
   },
   {
+    id: "2024-audi-q8-etron",
     name: "2024 Audi Q8 e-tron",
     specs: "51 Miles · Electric · AWD",
     price: "Rs.10,480,500",
@@ -48,6 +50,7 @@ const CARS = [
     img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80",
   },
   {
+    id: "2022-bmw-m8",
     name: "2022 BMW M8",
     specs: "16,880 Miles · Automatic · Gasoline",
     price: "Rs.10,480,500",
@@ -196,6 +199,7 @@ if (loading || !user) return null;
             <div key={car.name} className={s.carCard}>
               <div
                 className={s.carImg}
+                onClick={() => router.push(`/cars/${car.id}`)}
                 style={{ backgroundImage: `url('${car.img}')` }}
               >
                 <span className={`${s.carBadge} ${s[`badge_${car.badgeType}`]}`}>
