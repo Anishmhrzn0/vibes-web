@@ -196,16 +196,20 @@ if (loading || !user) return null;
 
         <div className={s.carsRow}>
           {CARS.map((car) => (
-            <div key={car.name} className={s.carCard}>
+            <div key={car.name}
+             className={s.carCard}
+             onClick={() => router.push(`/cars/${car.id}`)}
+             >
               <div
                 className={s.carImg}
-                onClick={() => router.push(`/cars/${car.id}`)}
                 style={{ backgroundImage: `url('${car.img}')` }}
               >
                 <span className={`${s.carBadge} ${s[`badge_${car.badgeType}`]}`}>
                   {car.badge}
                 </span>
-                <button className={s.carWish} aria-label="Add to wishlist">🤍</button>
+                <button className={s.carWish} aria-label="Add to wishlist"
+                onClick={(e) => e.stopPropagation()} 
+                >🤍</button>
               </div>
               <div className={s.carInfo}>
                 <div className={s.carInfoTop}>
