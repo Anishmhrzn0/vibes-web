@@ -23,13 +23,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(await res.json(), { status: res.status });
   }
 
-  // GET list
+// GET list
   const res = await fetch(`${API_BASE}/api/v1/admin/users${qs}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
   return NextResponse.json(await res.json(), { status: res.status });
 }
+
 
 // POST /api/admin/users
 export async function POST(req: NextRequest) {

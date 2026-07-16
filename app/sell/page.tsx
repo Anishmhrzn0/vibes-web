@@ -22,8 +22,9 @@ export default function SellPage() {
     carModel: "",
     mileage: "",
     price: "",
-    images: "",
   });
+  const [images, setImages] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -32,50 +33,55 @@ export default function SellPage() {
     setForm((f) => ({ ...f, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    const token = getCookie("ap_token");
-    if (!token) {
-      setError("You must be logged in to list a vehicle.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch("http://localhost:4000/api/cars", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          vin: form.vin,
-          year: Number(form.year),
-          make: form.make,
-          carModel: form.carModel,
-          mileage: Number(form.mileage),
-          price: Number(form.price),
-          images: form.images
-            .split(",")
-            .map((u) => u.trim())
-            .filter(Boolean),
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.message || "Failed to submit listing");
-      }
-
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
-    }
+  const handleFiles = (fileList: FileList | null) => {
+    if (!fileList) return;
+    const newFiles = Array.from(fileList).slice(0, 6 - images.length);
+    setImages((prev) => [...prev, ...newFiles].slice(0, 6));
+    setPreviews((prev) => [
+      ...prev,
+      ...newFiles.map((f) => URL.createObjectURL(f)),
+    ].slice(0, 6));
   };
+
+  const removeImage = (idx: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+    setPreviews((prev) => {
+      URL.revokeObjectURL(prev[idx]);
+      return prev.filter((_, i) => i !== idx);
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
+  setSubmitting(true);
+  try {
+    const fd = new FormData();
+    fd.append("vin", form.vin);
+    fd.append("year", form.year);
+    fd.append("make", form.make);
+    fd.append("carModel", form.carModel);
+    fd.append("mileage", form.mileage);
+    fd.append("price", form.price);
+    images.forEach((file) => fd.append("images", file));
+
+    const res = await fetch("/api/cars", {           // ✅ relative path, goes through rewrite proxy
+      method: "POST",
+      credentials: "include",                          // ✅ sends the httpOnly ap_token cookie
+      body: fd,
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      throw new Error(data?.message || "Failed to submit listing");
+    }
+    setSuccess(true);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Something went wrong");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   if (authLoading || !user) return null;
 
@@ -199,13 +205,38 @@ export default function SellPage() {
           </div>
 
           <div className={s.field}>
-            <label className={s.label}>Image URLs (comma-separated)</label>
-            <input
-              className={s.input}
-              value={form.images}
-              onChange={(e) => handleChange("images", e.target.value)}
-              placeholder="https://... , https://..."
-            />
+            <label className={s.label}>Photos (up to 6)</label>
+            <label className={s.uploadBox}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                multiple
+                onChange={(e) => handleFiles(e.target.files)}
+                className={s.fileInput}
+                disabled={images.length >= 6}
+              />
+              <span className={s.uploadText}>
+                📷 Tap to choose photos ({images.length}/6)
+              </span>
+            </label>
+
+            {previews.length > 0 && (
+              <div className={s.previewGrid}>
+                {previews.map((src, i) => (
+                  <div key={i} className={s.previewItem}>
+                    <img src={src} alt={`Preview ${i + 1}`} className={s.previewImg} />
+                    <button
+                      type="button"
+                      className={s.previewRemove}
+                      onClick={() => removeImage(i)}
+                      aria-label="Remove image"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {error && <p className={s.errorText}>{error}</p>}

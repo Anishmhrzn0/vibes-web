@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import s from "./admin.module.css";
@@ -10,12 +10,6 @@ const STATS = [
   { label: "Active Listings",       value: "1,284",     delta: "+5% this week",   positive: true },
   { label: "Verification Pending",  value: "42",        delta: "Action Req",      positive: false, warn: true },
   { label: "New Users",             value: "312",       delta: "+18% this month", positive: true },
-];
-
-const LISTINGS = [
-  { name: "2023 Porsche 911 GT3",   seller: "Alexander West",      price: "Rs.10,480,500", color: "#dbeafe", icon: "#2563eb" },
-  { name: "1967 Mustang Shelby",    seller: "Classic Revivals Ltd.", price: "Rs.10,480,500", color: "#fef3c7", icon: "#d97706" },
-  { name: "2024 Lucid Air Sapphire",seller: "Future Motion Inc.",   price: "Rs.10,480,500", color: "#d1fae5", icon: "#059669" },
 ];
 
 const ACTIVITY = [
@@ -31,15 +25,52 @@ const DISTRIBUTION = [
   { label: "Vintage classics", pct: 23, color: "#94a3b8" },
 ];
 
+interface PendingCar {
+  _id: string;
+  make: string;
+  carModel: string;
+  price: number;
+  sellerId: { fullName: string } | null;
+}
+
 export default function AdminDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [pending, setPending] = useState<PendingCar[]>([]);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
       router.replace("/dashboard");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!user || user.role !== "admin") return;
+    fetch("/api/admin/cars")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPending(data);
+        } else {
+          setPending([]);
+        }
+      })
+      .catch((err) => console.error("Failed to load pending cars", err));
+  }, [user]);
+
+  const handleStatus = async (id: string, status: "approved" | "rejected") => {
+    try {
+      const res = await fetch(`/api/admin/cars/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Update failed");
+      setPending((prev) => prev.filter((c) => c._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading || !user || user.role !== "admin") return null;
 
@@ -52,14 +83,8 @@ export default function AdminDashboardPage() {
           <div className={`${s.sbItem} ${s.active}`}>
             <span className={s.sbIcon}>📊</span> Overview
           </div>
-          <Link href="#" className={s.sbItem}>
-            <span className={s.sbIcon}>🚗</span> Listings
-          </Link>
           <Link href="/admin/users" className={s.sbItem}>
             <span className={s.sbIcon}>👥</span> Users
-          </Link>
-          <Link href="#" className={s.sbItem}>
-            <span className={s.sbIcon}>🧾</span> Transactions
           </Link>
         </nav>
         <div className={s.sbFooter}>
@@ -123,22 +148,22 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {LISTINGS.map((l) => (
-                    <tr key={l.name}>
+                  {pending.map((l) => (
+                    <tr key={l._id}>
                       <td>
                         <div className={s.carCell}>
-                          <div className={s.carThumb} style={{ background: l.color }}>
-                            <span style={{ fontSize: 14, color: l.icon }}>🚗</span>
+                          <div className={s.carThumb} style={{ background: "#dbeafe" }}>
+                            <span style={{ fontSize: 14, color: "#2563eb" }}>🚗</span>
                           </div>
-                          <span className={s.carName}>{l.name}</span>
+                          <span className={s.carName}>{l.make} {l.carModel}</span>
                         </div>
                       </td>
-                      <td className={s.seller}>{l.seller}</td>
-                      <td className={s.price}>{l.price}</td>
+                      <td className={s.seller}>{l.sellerId?.fullName ?? "Unknown"}</td>
+                      <td className={s.price}>Rs.{l.price.toLocaleString()}</td>
                       <td>
                         <div className={s.actionBtns}>
-                          <button className={s.btnApprove} aria-label="Approve">✓</button>
-                          <button className={s.btnReject}  aria-label="Reject">✕</button>
+                          <button className={s.btnApprove} aria-label="Approve" onClick={() => handleStatus(l._id, "approved")}>✓</button>
+                          <button className={s.btnReject}  aria-label="Reject" onClick={() => handleStatus(l._id, "rejected")}>✕</button>
                         </div>
                       </td>
                     </tr>
@@ -220,7 +245,6 @@ export default function AdminDashboardPage() {
   );
 }
 
-// Revenue bar chart using plain divs (no Canvas/Chart.js needed for this simple design)
 function RevenueChart() {
   const bars = [
     { month: "Jan", val: 5.2 },
