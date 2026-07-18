@@ -62,7 +62,7 @@ export default function ProfileEditPage() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Update failed");
 
-    setUser(data.user);         // ✅ update context
+    setUser(data.user);        
     setSuccess("Profile updated successfully!");
     setTimeout(() => router.push("/dashboard"), 1500);
   } catch (err: any) {

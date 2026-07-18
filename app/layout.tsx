@@ -1,7 +1,7 @@
-// app/layout.tsx — server component, handles metadata
+
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "./providers";  // ← client wrapper
+import { Providers } from "./providers"; 
 
 export const metadata: Metadata = {
   title: "VIBES — Secure Sign In",

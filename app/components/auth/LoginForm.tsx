@@ -36,22 +36,30 @@ export function LoginForm() {
   });
 
   async function onSubmit(data: LoginSchema) {
-    setServerError(null);
-    try {
-      await loginAction(data);
+  setServerError(null);
+  try {
+    await loginAction(data);
     const match = document.cookie
-        .split('; ')
-        .find(r => r.startsWith('ap_user='));
-      if (match) {
-        const user = JSON.parse(decodeURIComponent(match.split('=')[1]));
-        setUser(user);
-      }
+      .split('; ')
+      .find(r => r.startsWith('ap_user='));
+    if (match) {
+      const user = JSON.parse(decodeURIComponent(match.split('=')[1]));
+      setUser(user);
 
-      router.push('/');       
-    } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Login failed');
+      // redirect based on role
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
+      return;
     }
+
+    router.push('/');
+  } catch (err) {
+    setServerError(err instanceof Error ? err.message : 'Login failed');
   }
+}
 
   return (
     <div className={s.page}>

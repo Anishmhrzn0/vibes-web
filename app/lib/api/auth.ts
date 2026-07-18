@@ -10,6 +10,7 @@ export interface ApiUser {
   bio?: string;
   avatar?: string;
   createdAt: string;
+  role: "user" | "admin"; 
 }
 
 export interface AuthResponse {
@@ -26,6 +27,12 @@ export async function loginApi(payload: LoginSchema): Promise<AuthResponse> {
   const res = await axiosInstance.post(API_ENDPOINTS.auth.login, payload);
   return res.data; // ← unwrap .data.data
 }
+
+export async function whoamiApi(): Promise<{ success: boolean; user: ApiUser }> {
+  const res = await axiosInstance.get(API_ENDPOINTS.auth.whoami);
+  return res.data;
+}
+
 export const updateProfile = async (data: any) => {
     try {
         const response = await axiosInstance.put(API_ENDPOINTS.auth.update, data,  { 

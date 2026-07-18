@@ -103,7 +103,7 @@
 .specsHeader { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .specsIcon { font-size: 16px; }
 .specsTitle { font-size: 14px; font-weight: 700; color: #1e293b; }
-.specsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.specsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .specItem { }
 .specLabel {
   font-size: 9px; font-weight: 700; color: #94a3b8;

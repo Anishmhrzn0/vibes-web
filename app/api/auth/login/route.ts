@@ -42,9 +42,9 @@
         accessToken,
         user: {
           id:        user._id.toString(),
-          fullName:  user.fullName,
+          fullName:  user.fullName || (user as any).name || "",
           email:     user.email,
-          phone:     user.phone,
+          phone:     user.phone || (user as any).phoneNumber || "",
           bio:       user.bio,      
           avatar:    user.avatar,
           role:      user.role,

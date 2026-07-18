@@ -30,6 +30,7 @@ interface PendingCar {
   make: string;
   carModel: string;
   price: number;
+  condition?: string;
   sellerId: { fullName: string } | null;
 }
 
@@ -59,17 +60,17 @@ export default function AdminDashboardPage() {
   }, [user]);
 
   const handleStatus = async (id: string, status: "approved" | "rejected") => {
-    try {
-      const res = await fetch(`/api/admin/cars/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) throw new Error("Update failed");
-      setPending((prev) => prev.filter((c) => c._id !== id));
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await fetch(`/api/admin/cars/${id}/status`, {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ status }),
+});
+if (!res.ok) {
+  const errBody = await res.json().catch(() => null);
+  console.error("Update failed:", res.status, errBody);
+  throw new Error(errBody?.message || `Update failed (${res.status})`);
+}
+setPending((prev) => prev.filter((c) => c._id !== id));
   };
 
   if (loading || !user || user.role !== "admin") return null;
@@ -143,6 +144,7 @@ export default function AdminDashboardPage() {
                   <tr>
                     <th>Vehicle</th>
                     <th>Seller</th>
+                    <th>Condition</th>
                     <th>Price</th>
                     <th>Action</th>
                   </tr>
@@ -159,6 +161,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </td>
                       <td className={s.seller}>{l.sellerId?.fullName ?? "Unknown"}</td>
+                      <td className={s.condition}>{l.condition ?? "Good"}</td>
                       <td className={s.price}>Rs.{l.price.toLocaleString()}</td>
                       <td>
                         <div className={s.actionBtns}>

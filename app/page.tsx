@@ -3,9 +3,19 @@ import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import s from "./home.module.css";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-
+interface ApiCar {
+  _id: string;
+  vin: string;
+  year: number;
+  make: string;
+  carModel: string;
+  mileage: number;
+  price: number;
+  condition: string;
+  images: string[];
+}
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -30,36 +40,6 @@ const CATEGORIES = [
   },
 ];
 
-const CARS = [
-  {
-    id: "2023-porsche-911",
-    name: "2023 Porsche 911",
-    specs: "5,480 Miles · Automatic · Gasoline",
-    price: "Rs.10,480,500",
-    badge: "Instant Buy",
-    badgeType: "green",
-    img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&q=80",
-  },
-  {
-    id: "2024-audi-q8-etron",
-    name: "2024 Audi Q8 e-tron",
-    specs: "51 Miles · Electric · AWD",
-    price: "Rs.10,480,500",
-    badge: "Certified",
-    badgeType: "blue",
-    img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80",
-  },
-  {
-    id: "2022-bmw-m8",
-    name: "2022 BMW M8",
-    specs: "16,880 Miles · Automatic · Gasoline",
-    price: "Rs.10,480,500",
-    badge: "Featured",
-    badgeType: "amber",
-    img: "https://images.unsplash.com/photo-1555652736-e92021d28a10?w=600&q=80",
-  },
-];
-
 const FOOTER_FEATURES = [
   {
     icon: "🛡️",
@@ -81,17 +61,28 @@ const FOOTER_FEATURES = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
-  
+
   const { user, logout, loading } = useAuth();
-const router = useRouter();
+  const router = useRouter();
 
-useEffect(() => {
-  if (!loading && !user) {
-    router.replace("/login");
-  }
-}, [user, loading, router]);
+  const [cars, setCars] = useState<ApiCar[]>([]);
 
-if (loading || !user) return null;
+  useEffect(() => {
+    fetch("/api/cars")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setCars(data);
+      })
+      .catch((err) => console.error("Failed to load cars", err));
+  }, []);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) return null;
 
   return (
     <div className={s.page}>
@@ -195,29 +186,38 @@ if (loading || !user) return null;
         </div>
 
         <div className={s.carsRow}>
-          {CARS.map((car) => (
-            <div key={car.name}
-             className={s.carCard}
-             onClick={() => router.push(`/cars/${car.id}`)}
-             >
+          {cars.map((car) => (
+            <div
+              key={car._id}
+              className={s.carCard}
+              onClick={() => router.push(`/cars/${car._id}`)}
+            >
               <div
                 className={s.carImg}
-                style={{ backgroundImage: `url('${car.img}')` }}
+                style={{
+                  backgroundImage: `url('${car.images?.[0]
+                      ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`
+                      : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
+                    }')`,
+                }}
               >
-                <span className={`${s.carBadge} ${s[`badge_${car.badgeType}`]}`}>
-                  {car.badge}
-                </span>
-                <button className={s.carWish} aria-label="Add to wishlist"
-                onClick={(e) => e.stopPropagation()} 
-                >🤍</button>
+                <span className={`${s.carBadge} ${s.badge_blue}`}>Verified</span>
+                <button
+                  className={s.carWish}
+                  aria-label="Add to wishlist"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  🤍
+                </button>
               </div>
               <div className={s.carInfo}>
                 <div className={s.carInfoTop}>
-                  <span className={s.carName}>{car.name}</span>
-                  <span className={s.carPrice}>{car.price}</span>
+                  <span className={s.carName}>
+                    {car.year} {car.make} {car.carModel}
+                  </span>
+                  <span className={s.carPrice}>Rs.{car.price.toLocaleString()}</span>
                 </div>
-                <p className={s.carSpecs}>{car.specs}</p>
-                {/* Button hidden by default, revealed on card hover via CSS */}
+                <p className={s.carSpecs}>{car.mileage.toLocaleString()} Miles</p>
                 <div className={s.btnBuyWrap}>
                   <button className={s.btnBuy}>Instant Purchase</button>
                 </div>

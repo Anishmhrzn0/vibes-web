@@ -22,6 +22,7 @@ export default function SellPage() {
     carModel: "",
     mileage: "",
     price: "",
+    condition: "Excellent",
   });
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -63,6 +64,7 @@ export default function SellPage() {
     fd.append("carModel", form.carModel);
     fd.append("mileage", form.mileage);
     fd.append("price", form.price);
+    fd.append("condition", form.condition);
     images.forEach((file) => fd.append("images", file));
 
     const res = await fetch("/api/cars", {           // ✅ relative path, goes through rewrite proxy
@@ -192,16 +194,33 @@ export default function SellPage() {
             </div>
           </div>
 
-          <div className={s.field}>
-            <label className={s.label}>Price (Rs.)</label>
-            <input
-              className={s.input}
-              type="number"
-              value={form.price}
-              onChange={(e) => handleChange("price", e.target.value)}
-              placeholder="e.g. 2500000"
-              required
-            />
+          <div className={s.row}>
+            <div className={s.field}>
+              <label className={s.label}>Price (Rs.)</label>
+              <input
+                className={s.input}
+                type="number"
+                value={form.price}
+                onChange={(e) => handleChange("price", e.target.value)}
+                placeholder="e.g. 2500000"
+                required
+              />
+            </div>
+            <div className={s.field}>
+              <label className={s.label}>Condition</label>
+              <select
+                className={s.select}
+                value={form.condition}
+                onChange={(e) => handleChange("condition", e.target.value)}
+                required
+              >
+                <option value="New">New</option>
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Poor">Poor</option>
+              </select>
+            </div>
           </div>
 
           <div className={s.field}>
