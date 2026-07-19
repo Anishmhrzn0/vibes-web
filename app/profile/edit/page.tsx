@@ -64,7 +64,7 @@ export default function ProfileEditPage() {
 
     setUser(data.user);        
     setSuccess("Profile updated successfully!");
-    setTimeout(() => router.push("/dashboard"), 1500);
+    setTimeout(() => router.push("/home"), 1500);
   } catch (err: any) {
     setError(err.message || "Update failed");
   } finally {
@@ -75,7 +75,7 @@ export default function ProfileEditPage() {
     return (
         <div className="page-container">
             <div className="page-header">
-                <Link href="/dashboard" className="back-btn">← Back</Link>
+                <Link href="/home" className="back-btn">← Back</Link>
                 <h1>Edit Profileee</h1>
             </div>
 
@@ -146,7 +146,7 @@ export default function ProfileEditPage() {
                     </div>
 
                     <div className="form-actions">
-                        <Link href="/dashboard" className="btn-secondary">Cancel</Link>
+                        <Link href="/home" className="btn-secondary">Cancel</Link>
                         <button type="submit" className="btn-primary" disabled={loading}>
                             {loading ? "Saving..." : "Save Changes"}
                         </button>

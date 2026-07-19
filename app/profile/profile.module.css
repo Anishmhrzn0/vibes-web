@@ -1,0 +1,114 @@
+.page {
+  min-height: 100vh;
+  background: #f3f5f8;
+  padding-bottom: 60px;
+  font-family: "Montserrat", -apple-system, sans-serif;
+}
+
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px; background: #14202c;
+}
+.navBrand { color: #fff; font-weight: 800; font-size: 19px; text-decoration: none; letter-spacing: 0.6px; }
+.backLink { color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.15s; }
+.backLink:hover { color: #fff; }
+
+.banner {
+  height: 160px;
+  background: linear-gradient(115deg, #14202c 0%, #1e2d3d 55%, #24374a 100%);
+  position: relative;
+  overflow: hidden;
+}
+.bannerStripe {
+  position: absolute; top: 0; right: -10%; width: 45%; height: 100%;
+  background: linear-gradient(115deg, transparent 48%, rgba(26,107,255,0.18) 49%, rgba(26,107,255,0.18) 52%, transparent 53%);
+}
+
+.headerCard {
+  display: flex; align-items: flex-end; gap: 22px;
+  background: #fff; margin: 0 32px; padding: 24px 28px;
+  border-radius: 14px; box-shadow: 0 8px 24px rgba(20,32,44,0.08);
+  position: relative; top: -56px;
+}
+
+.avatarWrap { flex-shrink: 0; }
+.avatarImg { width: 100px; height: 100px; border-radius: 14px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.avatarPlaceholder {
+  width: 100px; height: 100px; border-radius: 14px; border: 4px solid #fff;
+  background: linear-gradient(135deg, #1e2d3d, #14202c);
+  color: #fff; font-size: 38px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.headerInfo { flex: 1; min-width: 0; }
+.nameRow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.name { font-size: 24px; font-weight: 800; color: #14202c; margin: 0; letter-spacing: -0.3px; }
+
+.plateBadge {
+  font-family: "Courier New", monospace;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  color: #1a6bff; background: #fff;
+  border: 2px solid #1a6bff; border-radius: 4px;
+  padding: 3px 8px;
+}
+
+.bio { color: #64748b; font-size: 14px; margin: 6px 0 0; max-width: 480px; line-height: 1.5; }
+
+.editBtn {
+  background: #14202c; color: #fff; text-decoration: none;
+  font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 8px;
+  transition: background 0.15s; white-space: nowrap;
+}
+.editBtn:hover { background: #1a6bff; }
+
+.grid {
+  display: grid; grid-template-columns: 280px 1fr; gap: 24px;
+  padding: 0 32px; margin-top: -22px;
+}
+
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+.card {
+  background: #fff; border-radius: 14px; padding: 22px;
+  box-shadow: 0 4px 16px rgba(20,32,44,0.06);
+}
+.cardTitle {
+  font-size: 12px; font-weight: 800; color: #14202c; margin: 0 0 18px;
+  text-transform: uppercase; letter-spacing: 0.6px;
+}
+
+.infoRow { display: flex; gap: 12px; margin-bottom: 18px; align-items: flex-start; }
+.infoRow:last-child { margin-bottom: 0; }
+.infoIcon {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  background: #eef4ff; color: #1a6bff;
+  display: flex; align-items: center; justify-content: center;
+}
+.infoLabel { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
+.infoValue { font-size: 14px; color: #14202c; font-weight: 600; margin-top: 2px; word-break: break-word; }
+
+.logoutBtn {
+  background: #fff; border: 1.5px solid #fecaca; color: #dc2626;
+  font-size: 13px; font-weight: 700; padding: 11px; border-radius: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.logoutBtn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+.main { background: #fff; border-radius: 14px; padding: 32px; box-shadow: 0 4px 16px rgba(20,32,44,0.06); }
+.mainTitle { font-size: 15px; font-weight: 800; color: #14202c; margin: 0 0 4px; }
+
+.emptyState { text-align: center; padding: 70px 20px; }
+.emptyIcon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
+.emptyText { color: #94a3b8; font-size: 14px; margin: 0 0 18px; }
+.emptyCta {
+  display: inline-block; background: #1a6bff; color: #fff; text-decoration: none;
+  font-size: 13px; font-weight: 700; padding: 10px 22px; border-radius: 8px;
+  transition: background 0.15s;
+}
+.emptyCta:hover { background: #0f56e0; }
+
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+  .headerCard { flex-direction: column; align-items: flex-start; top: -30px; }
+  .editBtn { align-self: stretch; text-align: center; }
+}
