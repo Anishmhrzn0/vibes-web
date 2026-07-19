@@ -112,3 +112,47 @@
   .headerCard { flex-direction: column; align-items: flex-start; top: -30px; }
   .editBtn { align-self: stretch; text-align: center; }
 }
+
+.mainHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.mainCount {
+  background: #eef4ff; color: #1a6bff; font-size: 12px; font-weight: 700;
+  padding: 2px 9px; border-radius: 999px;
+}
+
+.carsGrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px; margin-top: 20px;
+}
+.carCard {
+  border: 1px solid #edf0f3; border-radius: 12px; overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.carCard:hover { box-shadow: 0 4px 16px rgba(20,32,44,0.08); }
+
+.carImg {
+  height: 130px; background-size: cover; background-position: center;
+  position: relative;
+}
+.statusBadge {
+  position: absolute; top: 10px; left: 10px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+  padding: 4px 9px; border-radius: 6px; text-transform: uppercase;
+}
+.status_approved { background: #dcfce7; color: #16a34a; }
+.status_pending { background: #fef9c3; color: #ca8a04; }
+.status_rejected { background: #fee2e2; color: #dc2626; }
+
+.carInfo { padding: 12px 14px; }
+.carInfoTop { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.carName { font-size: 13px; font-weight: 700; color: #14202c; }
+.carPrice { font-size: 13px; font-weight: 700; color: #1a6bff; white-space: nowrap; }
+.carSpecs { font-size: 12px; color: #94a3b8; margin: 4px 0 0; }
+
+.carActions { display: flex; gap: 8px; margin-top: 10px; }
+.actionDelete {
+  flex: 1; font-size: 12px; font-weight: 700; padding: 7px; border-radius: 7px;
+  cursor: pointer; transition: all 0.15s;
+}
+.actionDelete { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.actionDelete:hover { background: #fee2e2; }
+.actionDelete:disabled{ opacity: 0.6; cursor: not-allowed; }

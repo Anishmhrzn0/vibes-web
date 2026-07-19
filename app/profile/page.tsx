@@ -1,16 +1,73 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import { useProtectedRoute } from "@/app/router/protected.route";
 import s from "./profile.module.css";
 
+interface MyCar {
+  _id: string;
+  year: number;
+  make: string;
+  carModel: string;
+  mileage: number;
+  price: number;
+  condition: string;
+  images: string[];
+  status: "pending" | "approved" | "rejected";
+}
+
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const { loading: authLoading } = useProtectedRoute();
 
+  const [cars, setCars] = useState<MyCar[]>([]);
+  const [carsLoading, setCarsLoading] = useState(true);
+  const [ setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    loadCars();
+  }, [user]);
+
+  const loadCars = () => {
+    setCarsLoading(true);
+    fetch("/api/cars/mine/list", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setCars(data);
+      })
+      .catch((err) => console.error("Failed to load your listings", err))
+      .finally(() => setCarsLoading(false));
+  };
+
   if (authLoading || !user) return null;
 
   const memberSince = new Date(user.createdAt).getFullYear();
+
+  const statusLabel: Record<MyCar["status"], string> = {
+    approved: "Live",
+    pending: "Pending Review",
+    rejected: "Rejected",
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this listing? This can't be undone.")) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/cars/mine/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete listing");
+      setCars((prev) => prev.filter((c) => c._id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete listing");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className={s.page}>
@@ -53,7 +110,6 @@ export default function ProfilePage() {
             <div className={s.infoRow}>
               <div className={s.infoIcon}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16v16H4z" opacity="0" />
                   <path d="M22 6l-10 7L2 6" />
                   <path d="M2 6h20v12H2z" />
                 </svg>
@@ -94,12 +150,60 @@ export default function ProfilePage() {
         </aside>
 
         <main className={s.main}>
-          <h3 className={s.mainTitle}>Your Listings</h3>
-          <div className={s.emptyState}>
-            <div className={s.emptyIcon}>🚗</div>
-            <p className={s.emptyText}>You haven't listed a vehicle yet.</p>
-            <Link href="/sell" className={s.emptyCta}>List your first car</Link>
+          <div className={s.mainHeader}>
+            <h3 className={s.mainTitle}>Your Listings</h3>
+            {cars.length > 0 && <span className={s.mainCount}>{cars.length}</span>}
           </div>
+
+          {carsLoading ? (
+            <div className={s.emptyState}>
+              <p className={s.emptyText}>Loading your listings…</p>
+            </div>
+          ) : cars.length === 0 ? (
+            <div className={s.emptyState}>
+              <div className={s.emptyIcon}>🚗</div>
+              <p className={s.emptyText}>You haven't listed a vehicle yet.</p>
+              <Link href="/sell" className={s.emptyCta}>List your first car</Link>
+            </div>
+          ) : (
+            <div className={s.carsGrid}>
+              {cars.map((car) => (
+                <div key={car._id} className={s.carCard}>
+                  <div
+                    className={s.carImg}
+                    style={{
+                      backgroundImage: `url('${
+                        car.images?.[0]
+                          ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`
+                          : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
+                      }')`,
+                    }}
+                  >
+                    <span className={`${s.statusBadge} ${s[`status_${car.status}`]}`}>
+                      {statusLabel[car.status]}
+                    </span>
+                  </div>
+                  <div className={s.carInfo}>
+                    <div className={s.carInfoTop}>
+                      <span className={s.carName}>{car.year} {car.make} {car.carModel}</span>
+                      <span className={s.carPrice}>Rs.{car.price.toLocaleString()}</span>
+                    </div>
+                    <p className={s.carSpecs}>{car.mileage.toLocaleString()} miles · {car.condition}</p>
+
+                    <div className={s.carActions}>
+                      <button
+                        className={s.actionDelete}
+                        onClick={() => handleDelete(car._id)}
+                        disabled={deletingId === car._id}
+                      >
+                        {deletingId === car._id ? "Deleting…" : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </div>

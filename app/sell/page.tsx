@@ -20,6 +20,8 @@ export default function SellPage() {
     year: "",
     make: "",
     carModel: "",
+    bodyType: "Sedan",
+    location: "",
     mileage: "",
     price: "",
     condition: "Excellent",
@@ -29,6 +31,42 @@ export default function SellPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [locating, setLocating] = useState(false);
+
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation isn't supported in this browser");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await res.json();
+          const city =
+            data.address?.city ||
+            data.address?.town ||
+            data.address?.suburb ||
+            data.address?.county ||
+            data.display_name ||
+            "";
+          handleChange("location", city);
+        } catch {
+          setError("Couldn't determine your location name — enter it manually");
+        } finally {
+          setLocating(false);
+        }
+      },
+      () => {
+        setError("Location permission denied — enter it manually");
+        setLocating(false);
+      }
+    );
+  };
 
   const handleChange = (field: string, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -53,37 +91,37 @@ export default function SellPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
-  setSubmitting(true);
-  try {
-    const fd = new FormData();
-    fd.append("vin", form.vin);
-    fd.append("year", form.year);
-    fd.append("make", form.make);
-    fd.append("carModel", form.carModel);
-    fd.append("mileage", form.mileage);
-    fd.append("price", form.price);
-    fd.append("condition", form.condition);
-    images.forEach((file) => fd.append("images", file));
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append("vin", form.vin);
+      fd.append("year", form.year);
+      fd.append("make", form.make);
+      fd.append("carModel", form.carModel);
+      fd.append("mileage", form.mileage);
+      fd.append("price", form.price);
+      fd.append("condition", form.condition);
+      images.forEach((file) => fd.append("images", file));
 
-    const res = await fetch("/api/cars", {           // ✅ relative path, goes through rewrite proxy
-      method: "POST",
-      credentials: "include",                          // ✅ sends the httpOnly ap_token cookie
-      body: fd,
-    });
+      const res = await fetch("/api/cars", {           // ✅ relative path, goes through rewrite proxy
+        method: "POST",
+        credentials: "include",                          // ✅ sends the httpOnly ap_token cookie
+        body: fd,
+      });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      throw new Error(data?.message || "Failed to submit listing");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "Failed to submit listing");
+      }
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSubmitting(false);
     }
-    setSuccess(true);
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "Something went wrong");
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
   if (authLoading || !user) return null;
 
@@ -191,6 +229,45 @@ export default function SellPage() {
                 placeholder="0"
                 required
               />
+            </div>
+          </div>
+          <div className={s.row}>
+            <div className={s.field}>
+              <label className={s.label}>Body Type</label>
+              <select
+                className={s.select}
+                value={form.bodyType}
+                onChange={(e) => handleChange("bodyType", e.target.value)}
+                required
+              >
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Truck">Truck</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Convertible">Convertible</option>
+              </select>
+            </div>
+            <div className={s.field}>
+              <label className={s.label}>Location</label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  className={s.input}
+                  value={form.location}
+                  onChange={(e) => handleChange("location", e.target.value)}
+                  placeholder="e.g. Kathmandu"
+                  required
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  className={s.uploadBox}
+                  onClick={handleUseLocation}
+                  disabled={locating}
+                  style={{ padding: "0 14px", whiteSpace: "nowrap", cursor: "pointer" }}
+                >
+                  {locating ? "Locating…" : "📍"}
+                </button>
+              </div>
             </div>
           </div>
 

@@ -13,6 +13,7 @@ interface ApiCar {
   carModel: string;
   mileage: number;
   price: number;
+  location: string;
   condition: string;
   images: string[];
 }
@@ -65,6 +66,7 @@ export default function HomePage() {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [cars, setCars] = useState<ApiCar[]>([]);
 
   useEffect(() => {
@@ -75,6 +77,17 @@ export default function HomePage() {
       })
       .catch((err) => console.error("Failed to load cars", err));
   }, []);
+
+  const filteredCars = cars.filter((car) => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      car.make.toLowerCase().includes(q) ||
+      car.carModel.toLowerCase().includes(q) ||
+      car.location?.toLowerCase().includes(q) ||
+      String(car.year).includes(q)
+    );
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -122,10 +135,12 @@ export default function HomePage() {
             <div className={s.hsInputWrap}>
               <span className={s.hsIcon}>🔍</span>
               <input
-                className={s.hsInput}
-                type="text"
-                placeholder="Search make, model, or year"
-              />
+  className={s.hsInput}
+  type="text"
+  placeholder="Search make, model, or year"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+/>
             </div>
             <div className={s.hsSelectWrap}>
               <select className={s.hsSelect} aria-label="Body type">
@@ -188,7 +203,7 @@ export default function HomePage() {
         </div>
 
         <div className={s.carsRow}>
-          {cars.map((car) => (
+          {filteredCars.map((car) => (
             <div
               key={car._id}
               className={s.carCard}
@@ -220,6 +235,8 @@ export default function HomePage() {
                   <span className={s.carPrice}>Rs.{car.price.toLocaleString()}</span>
                 </div>
                 <p className={s.carSpecs}>{car.mileage.toLocaleString()} Miles</p>
+                <p className={s.carSpecs}>{car.mileage.toLocaleString()} Miles</p>
+                {car.location && <p className={s.carSpecs}>📍 {car.location}</p>}
                 <div className={s.btnBuyWrap}>
                   <button className={s.btnBuy}>Instant Purchase</button>
                 </div>
