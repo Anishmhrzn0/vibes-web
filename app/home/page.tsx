@@ -109,7 +109,7 @@ export default function HomePage() {
           <Link href="/sell" className={s.navLink}>Sell</Link>
         </div>
         <div className={s.navRight}>
-          <button className={s.iconBtn} aria-label="Notifications">🔔</button>
+          <button className={s.iconBtn} aria-label="Notifications" onClick={() => router.push("/messages")}>🔔</button>
           <button className={s.iconBtn} aria-label="Wishlist">🤍</button>
           {user ? (
   <Link href="/profile" className={s.btnAccount}>
