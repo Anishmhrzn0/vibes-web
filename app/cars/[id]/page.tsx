@@ -211,7 +211,7 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
               <div className={s.priceLabel}>MARKET PRICE</div>
               <div className={s.priceValue}>Rs.{car.price.toLocaleString()}</div>
 
-              <button className={s.btnBuyNow} onClick={() => setShowInquiry(true)}>Buy Now</button>
+              <button className={s.btnBuyNow} onClick={() => router.push(`/cars/${car._id}/book`)}>Buy Now</button>
               <button className={s.btnMessage}>💬 Message Seller</button>
             </div>
 
@@ -245,81 +245,6 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
         </div>
         <div className={s.footerCopy}>© 2025 VIBES Global Marketplace. All Rights Reserved.</div>
       </footer>
-      {showInquiry && (
-  <div
-    style={{
-      position: "fixed", inset: 0, background: "rgba(20,32,44,0.5)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 100, padding: 20,
-    }}
-    onClick={() => { setShowInquiry(false); setInquirySent(false); }}
-  >
-    <div
-      style={{
-        background: "#fff", borderRadius: 14, padding: 28,
-        width: "100%", maxWidth: 440, boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {inquirySent ? (
-        <>
-          <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 800, color: "#14202c" }}>
-            Message sent
-          </h3>
-          <p style={{ color: "#64748b", fontSize: 14, margin: "0 0 20px" }}>
-            The seller will get back to you soon.
-          </p>
-          <button
-            onClick={() => { setShowInquiry(false); setInquirySent(false); }}
-            style={{
-              background: "#1a6bff", color: "#fff", border: "none",
-              padding: "10px 20px", borderRadius: 8, fontWeight: 700, cursor: "pointer",
-            }}
-          >
-            Close
-          </button>
-        </>
-      ) : (
-        <>
-          <h3 style={{ margin: "0 0 14px", fontSize: 18, fontWeight: 800, color: "#14202c" }}>
-            Message the Seller
-          </h3>
-          <textarea
-            value={inquiryMessage}
-            onChange={(e) => setInquiryMessage(e.target.value)}
-            rows={4}
-            style={{
-              width: "100%", padding: 10, border: "1px solid #e2e8f0",
-              borderRadius: 8, fontSize: 14, fontFamily: "inherit", resize: "vertical",
-            }}
-          />
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-            <button
-              onClick={() => setShowInquiry(false)}
-              style={{
-                background: "#fff", border: "1px solid #e2e8f0", color: "#64748b",
-                padding: "9px 18px", borderRadius: 8, fontWeight: 700, cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSendInquiry}
-              disabled={sendingInquiry}
-              style={{
-                background: "#1a6bff", border: "none", color: "#fff",
-                padding: "9px 18px", borderRadius: 8, fontWeight: 700, cursor: "pointer",
-                opacity: sendingInquiry ? 0.6 : 1,
-              }}
-            >
-              {sendingInquiry ? "Sending…" : "Send"}
-            </button>
-          </div>
-        </>
-      )}
+
     </div>
-  </div>
 )}
-    </div>
-  );
-}
