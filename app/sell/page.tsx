@@ -33,6 +33,7 @@ export default function SellPage() {
   const [success, setSuccess] = useState(false);
   const [locating, setLocating] = useState(false);
 
+
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
       setError("Geolocation isn't supported in this browser");
@@ -96,18 +97,20 @@ export default function SellPage() {
     setSubmitting(true);
     try {
       const fd = new FormData();
-      fd.append("vin", form.vin);
-      fd.append("year", form.year);
-      fd.append("make", form.make);
-      fd.append("carModel", form.carModel);
-      fd.append("mileage", form.mileage);
-      fd.append("price", form.price);
-      fd.append("condition", form.condition);
+fd.append("vin", form.vin);
+fd.append("year", form.year);
+fd.append("make", form.make);
+fd.append("carModel", form.carModel);
+fd.append("bodyType", form.bodyType);
+fd.append("location", form.location);
+fd.append("mileage", form.mileage);
+fd.append("price", form.price);
+fd.append("condition", form.condition);
       images.forEach((file) => fd.append("images", file));
 
-      const res = await fetch("/api/cars", {           // ✅ relative path, goes through rewrite proxy
+      const res = await fetch("/api/cars", {          
         method: "POST",
-        credentials: "include",                          // ✅ sends the httpOnly ap_token cookie
+        credentials: "include",                          
         body: fd,
       });
 

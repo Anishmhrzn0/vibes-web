@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import s from "./car.module.css";
 
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 interface CarDetail {
@@ -27,6 +28,10 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
   const [car, setCar] = useState<CarDetail | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
+  const [showInquiry, setShowInquiry] = useState(false);
+  const [inquiryMessage, setInquiryMessage] = useState("Hi, I'm interested in this vehicle. Is it still available?");
+  const [sendingInquiry, setSendingInquiry] = useState(false);
+  const [inquirySent, setInquirySent] = useState(false);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -45,6 +50,25 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
       router.replace("/login");
     }
   }, [user, loading, router]);
+
+  const handleSendInquiry = async () => {
+  if (!inquiryMessage.trim()) return;
+  setSendingInquiry(true);
+  try {
+    const res = await fetch("/api/inquiries", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ carId: car?._id, message: inquiryMessage }),
+    });
+    if (!res.ok) throw new Error("Failed to send inquiry");
+    setInquirySent(true);
+  } catch (err) {
+    alert(err instanceof Error ? err.message : "Failed to send inquiry");
+  } finally {
+    setSendingInquiry(false);
+  }
+};
 
   if (loading || !user) return null;
   if (notFound) return (
@@ -187,8 +211,7 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
               <div className={s.priceLabel}>MARKET PRICE</div>
               <div className={s.priceValue}>Rs.{car.price.toLocaleString()}</div>
 
-              <button className={s.btnBuyNow}>Buy Now</button>
-              <button className={s.btnInspect}>📅 Schedule Inspection</button>
+              <button className={s.btnBuyNow} onClick={() => setShowInquiry(true)}>Buy Now</button>
               <button className={s.btnMessage}>💬 Message Seller</button>
             </div>
 
@@ -222,6 +245,81 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
         </div>
         <div className={s.footerCopy}>© 2025 VIBES Global Marketplace. All Rights Reserved.</div>
       </footer>
+      {showInquiry && (
+  <div
+    style={{
+      position: "fixed", inset: 0, background: "rgba(20,32,44,0.5)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 100, padding: 20,
+    }}
+    onClick={() => { setShowInquiry(false); setInquirySent(false); }}
+  >
+    <div
+      style={{
+        background: "#fff", borderRadius: 14, padding: 28,
+        width: "100%", maxWidth: 440, boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {inquirySent ? (
+        <>
+          <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 800, color: "#14202c" }}>
+            Message sent
+          </h3>
+          <p style={{ color: "#64748b", fontSize: 14, margin: "0 0 20px" }}>
+            The seller will get back to you soon.
+          </p>
+          <button
+            onClick={() => { setShowInquiry(false); setInquirySent(false); }}
+            style={{
+              background: "#1a6bff", color: "#fff", border: "none",
+              padding: "10px 20px", borderRadius: 8, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            Close
+          </button>
+        </>
+      ) : (
+        <>
+          <h3 style={{ margin: "0 0 14px", fontSize: 18, fontWeight: 800, color: "#14202c" }}>
+            Message the Seller
+          </h3>
+          <textarea
+            value={inquiryMessage}
+            onChange={(e) => setInquiryMessage(e.target.value)}
+            rows={4}
+            style={{
+              width: "100%", padding: 10, border: "1px solid #e2e8f0",
+              borderRadius: 8, fontSize: 14, fontFamily: "inherit", resize: "vertical",
+            }}
+          />
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+            <button
+              onClick={() => setShowInquiry(false)}
+              style={{
+                background: "#fff", border: "1px solid #e2e8f0", color: "#64748b",
+                padding: "9px 18px", borderRadius: 8, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSendInquiry}
+              disabled={sendingInquiry}
+              style={{
+                background: "#1a6bff", border: "none", color: "#fff",
+                padding: "9px 18px", borderRadius: 8, fontWeight: 700, cursor: "pointer",
+                opacity: sendingInquiry ? 0.6 : 1,
+              }}
+            >
+              {sendingInquiry ? "Sending…" : "Send"}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
