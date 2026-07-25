@@ -25,6 +25,7 @@ export default function SellPage() {
     mileage: "",
     price: "",
     condition: "Excellent",
+    blueBookNumber: "",
   });
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -32,6 +33,8 @@ export default function SellPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [blueBookImage, setBlueBookImage] = useState<File | null>(null);
+  const [blueBookPreview, setBlueBookPreview] = useState<string | null>(null);
 
 
   const handleUseLocation = () => {
@@ -82,6 +85,12 @@ export default function SellPage() {
       ...newFiles.map((f) => URL.createObjectURL(f)),
     ].slice(0, 6));
   };
+  const handleBlueBookFile = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    const file = fileList[0];
+    setBlueBookImage(file);
+    setBlueBookPreview(URL.createObjectURL(file));
+  };
 
   const removeImage = (idx: number) => {
     setImages((prev) => prev.filter((_, i) => i !== idx));
@@ -106,6 +115,8 @@ fd.append("location", form.location);
 fd.append("mileage", form.mileage);
 fd.append("price", form.price);
 fd.append("condition", form.condition);
+fd.append("blueBookNumber", form.blueBookNumber);
+if (blueBookImage) fd.append("blueBookImage", blueBookImage);
       images.forEach((file) => fd.append("images", file));
 
       const res = await fetch("/api/cars", {          
@@ -334,6 +345,50 @@ fd.append("condition", form.condition);
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+          <div className={s.field}>
+            <label className={s.label}>Blue Book Number</label>
+            <input
+              className={s.input}
+              value={form.blueBookNumber}
+              onChange={(e) => handleChange("blueBookNumber", e.target.value)}
+              placeholder="Vehicle registration blue book number"
+              required
+            />
+          </div>
+
+          <div className={s.field}>
+            <label className={s.label}>Blue Book Photo</label>
+            <label className={s.uploadBox}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={(e) => handleBlueBookFile(e.target.files)}
+                className={s.fileInput}
+              />
+              <span className={s.uploadText}>
+                📷 Tap to upload blue book photo
+              </span>
+            </label>
+            {blueBookPreview && (
+              <div className={s.previewGrid}>
+                <div className={s.previewItem}>
+                  <img src={blueBookPreview} alt="Blue book preview" className={s.previewImg} />
+                  <button
+                    type="button"
+                    className={s.previewRemove}
+                    onClick={() => {
+                      if (blueBookPreview) URL.revokeObjectURL(blueBookPreview);
+                      setBlueBookImage(null);
+                      setBlueBookPreview(null);
+                    }}
+                    aria-label="Remove blue book image"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             )}
           </div>

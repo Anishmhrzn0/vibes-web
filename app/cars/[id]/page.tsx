@@ -52,23 +52,23 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
   }, [user, loading, router]);
 
   const handleSendInquiry = async () => {
-  if (!inquiryMessage.trim()) return;
-  setSendingInquiry(true);
-  try {
-    const res = await fetch("/api/inquiries", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ carId: car?._id, message: inquiryMessage }),
-    });
-    if (!res.ok) throw new Error("Failed to send inquiry");
-    setInquirySent(true);
-  } catch (err) {
-    alert(err instanceof Error ? err.message : "Failed to send inquiry");
-  } finally {
-    setSendingInquiry(false);
-  }
-};
+    if (!inquiryMessage.trim()) return;
+    setSendingInquiry(true);
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ carId: car?._id, message: inquiryMessage }),
+      });
+      if (!res.ok) throw new Error("Failed to send inquiry");
+      setInquirySent(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to send inquiry");
+    } finally {
+      setSendingInquiry(false);
+    }
+  };
 
   if (loading || !user) return null;
   if (notFound) return (
@@ -81,9 +81,10 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
 
   const carName = `${car.year} ${car.make} ${car.carModel}`;
   const mainImgSrc = car.images[activeImg]
-    ? `${API_BASE}${car.images[activeImg]}`
+    ? (car.images[activeImg].startsWith("http")
+      ? car.images[activeImg]
+      : `${API_BASE}${car.images[activeImg]}`)
     : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80";
-
   return (
     <div className={s.page}>
       {/* ── Navbar ── */}
@@ -147,7 +148,11 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
                     className={`${s.thumb} ${activeImg === i + 1 ? s.thumbActive : ""}`}
                     onClick={() => setActiveImg(i + 1)}
                   >
-                    <img src={`${API_BASE}${img}`} alt={`View ${i + 2}`} className={s.thumbImg} />
+                    <img
+                      src={img.startsWith("http") ? img : `${API_BASE}${img}`}
+                      alt={`View ${i + 2}`}
+                      className={s.thumbImg}
+                    />
                   </div>
                 ))}
               </div>
@@ -247,4 +252,5 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
       </footer>
 
     </div>
-)}
+  )
+}

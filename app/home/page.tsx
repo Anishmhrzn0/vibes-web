@@ -213,9 +213,11 @@ export default function HomePage() {
                 className={s.carImg}
                 style={{
                   backgroundImage: `url('${car.images?.[0]
-                      ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`
-                      : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
-                    }')`,
+    ? (car.images[0].startsWith("http")
+        ? car.images[0]
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`)
+    : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
+  }')`,
                 }}
               >
                 <span className={`${s.carBadge} ${s.badge_blue}`}>Verified</span>
