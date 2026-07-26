@@ -1,4 +1,4 @@
-export type ListingStatus = "active" | "draft" | "sold";
+export type ListingStatus = "active" | "pending" | "booked" | "sold";
 
 export interface SellerListing {
   _id: string;
@@ -14,6 +14,8 @@ export interface SellerListing {
   photosPublished: boolean;
   soldOn?: string; // ISO date
   marketTimeDays?: number; // days it took to sell
+  bookedOn?: string; // ISO date
+  depositAmount?: number;
   createdAt: string;
 }
 

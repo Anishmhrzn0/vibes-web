@@ -68,6 +68,7 @@ export default function HomePage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [cars, setCars] = useState<ApiCar[]>([]);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch("/api/cars")
@@ -88,6 +89,24 @@ export default function HomePage() {
       String(car.year).includes(q)
     );
   });
+  const handleToggleSave = async (e: React.MouseEvent, carId: string) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`/api/cars/${carId}/save`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        if (data.saved) next.add(carId);
+        else next.delete(carId);
+        return next;
+      });
+    } catch (err) {
+      console.error("Failed to toggle save", err);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -102,7 +121,7 @@ export default function HomePage() {
     <div className={s.page}>
       {/* ── Navbar ── */}
       <nav className={s.nav}>
-        
+
         <div className={s.navBrand}>VIBES</div>
         <div className={s.navLinks}>
           <Link href="/" className={`${s.navLink} ${s.navLinkActive}`}>Buy</Link>
@@ -112,12 +131,12 @@ export default function HomePage() {
           <button className={s.iconBtn} aria-label="Notifications">🔔</button>
           <button className={s.iconBtn} aria-label="Wishlist">🤍</button>
           {user ? (
-  <Link href="/profile" className={s.btnAccount}>
-    {user.fullName?.split(" ")[0] ?? "Account"}
-  </Link>
-) : (
-  <Link href="/login" className={s.btnAccount}>Account</Link>
-)}
+            <Link href="/profile" className={s.btnAccount}>
+              {user.fullName?.split(" ")[0] ?? "Account"}
+            </Link>
+          ) : (
+            <Link href="/login" className={s.btnAccount}>Account</Link>
+          )}
         </div>
       </nav>
 
@@ -135,12 +154,12 @@ export default function HomePage() {
             <div className={s.hsInputWrap}>
               <span className={s.hsIcon}>🔍</span>
               <input
-  className={s.hsInput}
-  type="text"
-  placeholder="Search make, model, or year"
-  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-/>
+                className={s.hsInput}
+                type="text"
+                placeholder="Search make, model, or year"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <div className={s.hsSelectWrap}>
               <select className={s.hsSelect} aria-label="Body type">
@@ -213,20 +232,20 @@ export default function HomePage() {
                 className={s.carImg}
                 style={{
                   backgroundImage: `url('${car.images?.[0]
-    ? (car.images[0].startsWith("http")
-        ? car.images[0]
-        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`)
-    : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
-  }')`,
+                    ? (car.images[0].startsWith("http")
+                      ? car.images[0]
+                      : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`)
+                    : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
+                    }')`,
                 }}
               >
                 <span className={`${s.carBadge} ${s.badge_blue}`}>Verified</span>
                 <button
                   className={s.carWish}
                   aria-label="Add to wishlist"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => handleToggleSave(e, car._id)}
                 >
-                  🤍
+                  {savedIds.has(car._id) ? "❤️" : "🤍"}
                 </button>
               </div>
               <div className={s.carInfo}>
