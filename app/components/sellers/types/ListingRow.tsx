@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Pencil, MoreVertical, Trash2, Eye, Heart } from "lucide-react";
+import { Trash2, Heart } from "lucide-react";
 import type { SellerListing } from "@/types/seller";
 import StatusBadge from "./StatusBadge";
 import s from "./seller.module.css";
@@ -33,17 +33,32 @@ export default function ListingRow({
       {/* Vehicle details */}
       <td>
         <div className={s.vehicleCell}>
-          {listing.image ? (
-            <Image
-              src={listing.image}
-              alt={listing.title}
-              width={64}
-              height={48}
-              className={s.vehicleImg}
-            />
-          ) : (
-            <div className={s.vehicleImg} />
-          )}
+          <div className={s.vehicleThumbWrap}>
+            {listing.image ? (
+              <Image
+                src={listing.image}
+                alt={listing.title}
+                width={64}
+                height={48}
+                className={s.vehicleImg}
+              />
+            ) : (
+              <div className={s.vehicleImg} />
+            )}
+            <span
+              className={`${s.imgTag} ${
+                isSold
+                  ? s.imgTagSold
+                  : isBooked
+                  ? s.imgTagBooked
+                  : isPending
+                  ? s.imgTagPending
+                  : s.imgTagActive
+              }`}
+            >
+              {isSold ? "Sold" : isBooked ? "Booked" : isPending ? "Pending" : "Active"}
+            </span>
+          </div>
           <div>
             <div className={s.vehicleTitle}>{listing.title}</div>
             <div className={s.vehicleSub}>
@@ -108,15 +123,6 @@ export default function ListingRow({
           <div className={s.perfRow}>
             <div className={s.perfItem}>
               <span className={s.perfIcon}>
-                <Eye size={14} />
-              </span>
-              {listing.views && listing.views >= 1000
-                ? `${(listing.views / 1000).toFixed(1)}k`
-                : listing.views}
-              <span className={s.perfLabel}>Views</span>
-            </div>
-            <div className={s.perfItem}>
-              <span className={s.perfIcon}>
                 <Heart size={14} />
               </span>
               {listing.saves}
@@ -131,14 +137,11 @@ export default function ListingRow({
         {isActive && (
           <div className={s.actions}>
             <button
-              onClick={() => onEdit(listing._id)}
-              className={s.iconBtn}
-              aria-label="Edit listing"
+              onClick={() => onDelete(listing._id)}
+              className={`${s.iconBtn} ${s.iconBtnDanger}`}
+              aria-label="Delete listing"
             >
-              <Pencil size={16} />
-            </button>
-            <button className={s.iconBtn} aria-label="More actions">
-              <MoreVertical size={16} />
+              <Trash2 size={16} />
             </button>
           </div>
         )}

@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const body = await req.json();
-  const res = await fetch(`${API_BASE}/api/cars/${id}/status`, {
+  const res = await fetch(`${API_BASE}/api/v1/cars/${id}/status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),

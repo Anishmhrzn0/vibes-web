@@ -78,6 +78,16 @@ export default function HomePage() {
       })
       .catch((err) => console.error("Failed to load cars", err));
   }, []);
+  useEffect(() => {
+  fetch("/api/cars/wishlist/mine", { credentials: "include" })
+    .then((r) => r.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setSavedIds(new Set(data.map((c: ApiCar) => c._id)));
+      }
+    })
+    .catch((err) => console.error("Failed to load wishlist state", err));
+}, []);
 
   const filteredCars = cars.filter((car) => {
     const q = searchQuery.trim().toLowerCase();
@@ -129,7 +139,7 @@ export default function HomePage() {
         </div>
         <div className={s.navRight}>
           <button className={s.iconBtn} aria-label="Notifications">🔔</button>
-          <button className={s.iconBtn} aria-label="Wishlist">🤍</button>
+          <Link href="/wishlist" className={s.iconBtn} aria-label="Wishlist">🤍</Link>
           {user ? (
             <Link href="/profile" className={s.btnAccount}>
               {user.fullName?.split(" ")[0] ?? "Account"}

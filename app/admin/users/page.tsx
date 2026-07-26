@@ -12,6 +12,7 @@ import {
 
 import { DeleteConfirmModal } from "@/app/components/admin/DeleteConfirmModal";
 import { UserFormModal } from "@/app/components/admin/userformModel";
+import "./admin-users.css";
 
 const PAGE_SIZE = 10;
 

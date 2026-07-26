@@ -9,7 +9,6 @@ export interface SellerListing {
   price: number;
   marketAvg?: number; // for active/draft
   finalSale?: number; // for sold
-  views?: number;
   saves?: number;
   photosPublished: boolean;
   soldOn?: string; // ISO date
@@ -20,8 +19,7 @@ export interface SellerListing {
 }
 
 export interface SellerStats {
-  totalViews: number;
-  totalViewsChangePct: number; // e.g. 14 means +14%
+  totalSaves: number;
   pendingOffers: number;
   pendingOffersNeedingReview: number;
   activeListings: number;

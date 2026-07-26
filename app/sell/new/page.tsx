@@ -106,22 +106,22 @@ export default function SellPage() {
     setSubmitting(true);
     try {
       const fd = new FormData();
-fd.append("vin", form.vin);
-fd.append("year", form.year);
-fd.append("make", form.make);
-fd.append("carModel", form.carModel);
-fd.append("bodyType", form.bodyType);
-fd.append("location", form.location);
-fd.append("mileage", form.mileage);
-fd.append("price", form.price);
-fd.append("condition", form.condition);
-fd.append("blueBookNumber", form.blueBookNumber);
-if (blueBookImage) fd.append("blueBookImage", blueBookImage);
+      fd.append("vin", form.vin);
+      fd.append("year", form.year);
+      fd.append("make", form.make);
+      fd.append("carModel", form.carModel);
+      fd.append("bodyType", form.bodyType);
+      fd.append("location", form.location);
+      fd.append("mileage", form.mileage);
+      fd.append("price", form.price);
+      fd.append("condition", form.condition);
+      fd.append("blueBookNumber", form.blueBookNumber);
+      if (blueBookImage) fd.append("blueBookImage", blueBookImage);
       images.forEach((file) => fd.append("images", file));
 
-      const res = await fetch("/api/cars", {          
+      const res = await fetch("/api/cars", {
         method: "POST",
-        credentials: "include",                          
+        credentials: "include",
         body: fd,
       });
 
@@ -168,9 +168,9 @@ if (blueBookImage) fd.append("blueBookImage", blueBookImage);
         <div className={s.navRight}>
           <button className={s.iconBtn} aria-label="Notifications">🔔</button>
           <button className={s.iconBtn} aria-label="Wishlist">🤍</button>
-          <button className={s.btnAccount} onClick={logout}>
+          <Link href="/profile" className={s.btnAccount}>
             {user.fullName?.split(" ")[0] ?? "Account"}
-          </button>
+          </Link>
         </div>
       </nav>
 

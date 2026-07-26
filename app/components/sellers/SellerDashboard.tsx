@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Eye, Tag, Car, Clock, Search, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
+import { Plus, Heart, Tag, Car, Clock, Search, SlidersHorizontal, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/app/context/AuthContext";
 import StatCard from "./StatCard";
 import ListingRow from "./ListingRow";
 import {
@@ -14,6 +16,7 @@ import type { SellerStats, SellerListing } from "@/types/seller";
 import s from "./seller.module.css";
 
 export default function SellerDashboard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [listings, setListings] = useState<SellerListing[]>([]);
   const [search, setSearch] = useState("");
@@ -67,6 +70,27 @@ export default function SellerDashboard() {
 
   return (
     <div className={s.page}>
+      {/* Navbar */}
+      <nav className={s.nav}>
+        <div className={s.navBrand}>VIBES</div>
+        <div className={s.navLinks}>
+          <Link href="/home" className={s.navLink}>Buy</Link>
+          <Link href="/sell" className={`${s.navLink} ${s.navLinkActive}`}>Sell</Link>
+        </div>
+        <div className={s.navRight}>
+          <button className={s.iconBtnNav} aria-label="Notifications">🔔</button>
+          <button className={s.iconBtnNav} aria-label="Wishlist">🤍</button>
+          <Link href="/profile" className={s.btnAccount}>
+            {user?.fullName?.split(" ")[0] ?? "Account"}
+          </Link>
+        </div>
+      </nav>
+
+      <div className={s.content}>
+      <Link href="/home" className={s.backHomeLink}>
+        <ArrowLeft size={14} />
+        Back to Home
+      </Link>
       {/* Header */}
       <div className={s.header}>
         <div>
@@ -85,13 +109,10 @@ export default function SellerDashboard() {
       {/* Stat cards */}
       <div className={s.statsGrid}>
         <StatCard
-          label="Total Views"
-          icon={<Eye size={16} />}
-          value={stats?.totalViews.toLocaleString() ?? "—"}
-          sublabel={
-            stats ? `↑ ${stats.totalViewsChangePct}% from last week` : undefined
-          }
-          positive
+          label="Total Saves"
+          icon={<Heart size={16} />}
+          value={stats?.totalSaves.toLocaleString() ?? "—"}
+          sublabel="Buyers who saved your listings"
         />
         <StatCard
           label="Pending Offers"
@@ -181,6 +202,7 @@ export default function SellerDashboard() {
             </table>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

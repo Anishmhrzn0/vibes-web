@@ -138,9 +138,10 @@
   font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
   padding: 4px 9px; border-radius: 6px; text-transform: uppercase;
 }
-.status_approved { background: #dcfce7; color: #16a34a; }
-.status_pending { background: #fef9c3; color: #ca8a04; }
-.status_rejected { background: #fee2e2; color: #dc2626; }
+.status_active { background: #059669; color: #fff; }
+.status_pending { background: #64748b; color: #fff; }
+.status_booked { background: #d97706; color: #fff; }
+.status_sold { background: #2563eb; color: #fff; }
 
 .carInfo { padding: 12px 14px; }
 .carInfoTop { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }

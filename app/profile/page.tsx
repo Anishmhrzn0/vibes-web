@@ -14,7 +14,18 @@ interface MyCar {
   price: number;
   condition: string;
   images: string[];
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "active" | "rejected";
+  isBooked?: boolean;
+  soldAt?: string;
+}
+
+type DisplayStatus = "active" | "pending" | "booked" | "sold";
+
+function getDisplayStatus(car: MyCar): DisplayStatus {
+  if (car.soldAt) return "sold";
+  if (car.isBooked) return "booked";
+  if (car.status === "active") return "active";
+  return "pending"; // covers both "pending" and "rejected"
 }
 
 export default function ProfilePage() {
@@ -46,10 +57,11 @@ export default function ProfilePage() {
 
   const memberSince = new Date(user.createdAt).getFullYear();
 
-  const statusLabel: Record<MyCar["status"], string> = {
-    approved: "Live",
+  const statusLabel: Record<DisplayStatus, string> = {
+    active: "Live",
     pending: "Pending Review",
-    rejected: "Rejected",
+    booked: "Booked",
+    sold: "Sold",
   };
 
   const handleDelete = async (id: string) => {
@@ -167,41 +179,44 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className={s.carsGrid}>
-              {cars.map((car) => (
-                <div key={car._id} className={s.carCard}>
-                  <div
-                    className={s.carImg}
-                    style={{
-                      backgroundImage: `url('${
-                        car.images?.[0]
-                          ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`
-                          : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80"
-                      }')`,
-                    }}
-                  >
-                    <span className={`${s.statusBadge} ${s[`status_${car.status}`]}`}>
-                      {statusLabel[car.status]}
-                    </span>
-                  </div>
-                  <div className={s.carInfo}>
-                    <div className={s.carInfoTop}>
-                      <span className={s.carName}>{car.year} {car.make} {car.carModel}</span>
-                      <span className={s.carPrice}>Rs.{car.price.toLocaleString()}</span>
-                    </div>
-                    <p className={s.carSpecs}>{car.mileage.toLocaleString()} miles · {car.condition}</p>
+              {cars.map((car) => {
+                const displayStatus = getDisplayStatus(car);
+                const imgSrc = car.images?.[0]
+                  ? car.images[0].startsWith("http")
+                    ? car.images[0]
+                    : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`
+                  : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80";
 
-                    <div className={s.carActions}>
-                      <button
-                        className={s.actionDelete}
-                        onClick={() => handleDelete(car._id)}
-                        disabled={deletingId === car._id}
-                      >
-                        {deletingId === car._id ? "Deleting…" : "Delete"}
-                      </button>
+                return (
+                  <div key={car._id} className={s.carCard}>
+                    <div
+                      className={s.carImg}
+                      style={{ backgroundImage: `url('${imgSrc}')` }}
+                    >
+                      <span className={`${s.statusBadge} ${s[`status_${displayStatus}`]}`}>
+                        {statusLabel[displayStatus]}
+                      </span>
+                    </div>
+                    <div className={s.carInfo}>
+                      <div className={s.carInfoTop}>
+                        <span className={s.carName}>{car.year} {car.make} {car.carModel}</span>
+                        <span className={s.carPrice}>Rs.{car.price.toLocaleString()}</span>
+                      </div>
+                      <p className={s.carSpecs}>{car.mileage.toLocaleString()} miles · {car.condition}</p>
+
+                      <div className={s.carActions}>
+                        <button
+                          className={s.actionDelete}
+                          onClick={() => handleDelete(car._id)}
+                          disabled={deletingId === car._id}
+                        >
+                          {deletingId === car._id ? "Deleting…" : "Delete"}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </main>
