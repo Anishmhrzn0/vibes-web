@@ -5,7 +5,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 // GET /api/cars — public, approved listings only
 export async function GET() {
   try {
-    const res = await fetch(`${API_BASE}/api/cars`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE}/api/v1/cars`, { cache: "no-store" });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (err) {

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const token = getToken(req);
   if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const res = await fetch(`${API_BASE}/api/cars/mine/list`, {
+  const res = await fetch(`${API_BASE}/api/v1/cars/mine/list`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
