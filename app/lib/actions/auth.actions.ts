@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { registerApi, loginApi, updateProfile, updatePassword } from '@/app/lib/api/auth';
+import { registerApi, loginApi, updateProfile, updatePassword, forgotPasswordApi, resetPasswordApi } from '@/app/lib/api/auth';
 import type { RegisterSchema, LoginSchema } from '@/app/lib/schemas/auth.schema';
 import { revalidatePath } from 'next/cache';
 import { UpdatePasswordFormData } from '@/app/components/auth/schema';
@@ -74,4 +74,11 @@ export async function getSession() {
   } catch {
     return null;
   }
+}
+export async function forgotPasswordAction(email: string) {
+  return forgotPasswordApi(email);
+}
+
+export async function resetPasswordAction(token: string, password: string) {
+  return resetPasswordApi(token, password);
 }

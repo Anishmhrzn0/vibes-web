@@ -57,3 +57,15 @@ export const updatePassword = async (data: any) => {
             || 'Failed to update password');
     }
 }
+export async function forgotPasswordApi(email: string): Promise<{ success: boolean; message: string }> {
+  const res = await axiosInstance.post(API_ENDPOINTS.auth.forgotPassword, { email });
+  return res.data;
+}
+
+export async function resetPasswordApi(
+  token: string,
+  password: string
+): Promise<{ success: boolean; message: string }> {
+  const res = await axiosInstance.post(API_ENDPOINTS.auth.resetPassword(token), { password });
+  return res.data;
+}

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Shield, GitBranch, BadgeCheck, Eye, EyeOff } from 'lucide-react';
 
 import { loginSchema, type LoginSchema } from '@/app/lib/schemas/auth.schema';
-import { loginAction } from '@/app/lib/actions/auth.actions';
+import { loginAction, forgotPasswordAction } from '@/app/lib/actions/auth.actions';
 import { FieldError } from './FieldError';
 import s from './auth.module.css';
 import { useRouter } from 'next/navigation';
@@ -21,9 +21,87 @@ const TRUST_BADGES = [
   { icon: <BadgeCheck size={12} />, label: 'Verified'  },
 ] as const;
 
+function ForgotPasswordTab({ onBack }: { onBack: () => void }) {
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await forgotPasswordAction(email);
+      setMessage(res.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={s.card}>
+      <div className={s.iconWrap}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8922A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      </div>
+
+      <h1 className={s.title}>Reset your password</h1>
+      <p className={s.subtitle}>Enter your email and we&apos;ll send you a reset link.</p>
+
+      {message ? (
+        <>
+          <p className={s.serverError} style={{ color: '#16a34a', background: '#dcfce7' }}>
+            {message}
+          </p>
+          <button type="button" className={s.submitButton} onClick={onBack}>
+            <span>Back to Sign In</span>
+          </button>
+        </>
+      ) : (
+        <form className={s.form} onSubmit={handleSubmit} noValidate>
+          {error && <p className={s.serverError}>{error}</p>}
+
+          <div className={s.field}>
+            <label className={s.label} htmlFor="reset-email">Email address</label>
+            <input
+              id="reset-email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              className={s.input}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" className={s.submitButton} disabled={submitting}>
+            {submitting ? <div className={s.spinner} /> : <span>Send reset link</span>}
+          </button>
+
+          <button
+            type="button"
+            className={s.forgotLink}
+            style={{ marginTop: 16, background: 'none', border: 'none', cursor: 'pointer' }}
+            onClick={onBack}
+          >
+            ← Back to Sign In
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError]   = useState<string | null>(null);
+  const [mode, setMode] = useState<'login' | 'forgot'>('login');
   const router = useRouter();
   const { setUser } = useAuth();
 
@@ -72,57 +150,68 @@ export function LoginForm() {
       </nav>
 
       <main className={s.main}>
-        <div className={s.card}>
+        {mode === 'forgot' ? (
+          <ForgotPasswordTab onBack={() => setMode('login')} />
+        ) : (
+          <div className={s.card}>
 
-          <div className={s.iconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8922A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-
-          <h1 className={s.title}>Sign in to VIBES</h1>
-          <p className={s.subtitle}>Enter your email and password to continue.</p>
-
-          {serverError && <p className={s.serverError}>{serverError}</p>}
-
-          <form className={s.form} onSubmit={handleSubmit(onSubmit)} noValidate>
-
-            <div className={s.field}>
-              <label className={s.label} htmlFor="email">Email address</label>
-              <input
-                id="email" type="email" placeholder="you@example.com" autoComplete="email"
-                className={`${s.input} ${errors.email ? s.inputError : ''}`}
-                {...register('email')}
-              />
-              <FieldError message={errors.email?.message} />
+            <div className={s.iconWrap}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8922A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
             </div>
 
-            <div className={s.field}>
-              <label className={s.label} htmlFor="password">Password</label>
-              <div className={s.passwordWrap}>
+            <h1 className={s.title}>Sign in to VIBES</h1>
+            <p className={s.subtitle}>Enter your email and password to continue.</p>
+
+            {serverError && <p className={s.serverError}>{serverError}</p>}
+
+            <form className={s.form} onSubmit={handleSubmit(onSubmit)} noValidate>
+
+              <div className={s.field}>
+                <label className={s.label} htmlFor="email">Email address</label>
                 <input
-                  id="password" type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password"
-                  className={`${s.input} ${errors.password ? s.inputError : ''}`}
-                  {...register('password')}
+                  id="email" type="email" placeholder="you@example.com" autoComplete="email"
+                  className={`${s.input} ${errors.email ? s.inputError : ''}`}
+                  {...register('email')}
                 />
-                <button type="button" className={s.passwordToggle} onClick={() => setShowPassword(p => !p)} tabIndex={-1} aria-label="Toggle password">
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                <FieldError message={errors.email?.message} />
+              </div>
+
+              <div className={s.field}>
+                <label className={s.label} htmlFor="password">Password</label>
+                <div className={s.passwordWrap}>
+                  <input
+                    id="password" type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password"
+                    className={`${s.input} ${errors.password ? s.inputError : ''}`}
+                    {...register('password')}
+                  />
+                  <button type="button" className={s.passwordToggle} onClick={() => setShowPassword(p => !p)} tabIndex={-1} aria-label="Toggle password">
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                <FieldError message={errors.password?.message} />
+                <button
+                  type="button"
+                  className={s.forgotLink}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  onClick={() => setMode('forgot')}
+                >
+                  Forgot password?
                 </button>
               </div>
-              <FieldError message={errors.password?.message} />
-              <Link href="#" className={s.forgotLink}>Forgot password?</Link>
-            </div>
 
-            <button type="submit" className={s.submitButton} disabled={isSubmitting}>
-              {isSubmitting ? <div className={s.spinner} /> : <><span>Sign in</span><ArrowRight size={14} /></>}
-            </button>
-          </form>
+              <button type="submit" className={s.submitButton} disabled={isSubmitting}>
+                {isSubmitting ? <div className={s.spinner} /> : <><span>Sign in</span><ArrowRight size={14} /></>}
+              </button>
+            </form>
 
-          <p className={s.authPrompt}>
-            Don&apos;t have an account? <Link href="/register">Create one</Link>
-          </p>
-        </div>
+            <p className={s.authPrompt}>
+              Don&apos;t have an account? <Link href="/register">Create one</Link>
+            </p>
+          </div>
+        )}
 
         <div className={s.badges}>
           {TRUST_BADGES.map(({ icon, label }) => (

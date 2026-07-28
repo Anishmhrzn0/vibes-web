@@ -17,6 +17,9 @@ interface MyCar {
   status: "pending" | "active" | "rejected";
   isBooked?: boolean;
   soldAt?: string;
+  soldPrice?: number;
+  depositAmount?: number;
+  sellerId?: { fullName: string } | null;
 }
 
 type DisplayStatus = "active" | "pending" | "booked" | "sold";
@@ -36,11 +39,24 @@ export default function ProfilePage() {
   const [carsLoading, setCarsLoading] = useState(true);
   const [ setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [purchases, setPurchases] = useState<MyCar[]>([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     loadCars();
   }, [user]);
+
+  useEffect(() => {
+  if (!user) return;
+  fetch("/api/cars/purchases/mine", { credentials: "include" })
+    .then((r) => r.json())
+    .then((data) => {
+      if (Array.isArray(data)) setPurchases(data);
+    })
+    .catch((err) => console.error("Failed to load your purchases", err))
+    .finally(() => setPurchasesLoading(false));
+}, [user]);
 
   const loadCars = () => {
     setCarsLoading(true);
@@ -84,9 +100,14 @@ export default function ProfilePage() {
   return (
     <div className={s.page}>
       <nav className={s.nav}>
-        <Link href="/home" className={s.navBrand}>VIBES</Link>
-        <Link href="/home" className={s.backLink}>← Back to marketplace</Link>
-      </nav>
+  <Link href="/home" className={s.navBrand}>VIBES</Link>
+  <div style={{ display: "flex", gap: 16 }}>
+    <Link href="/home" className={s.backLink}>← Back to marketplace</Link>
+    {user.role === "admin" && (
+      <Link href="/admin" className={s.backLink}>← Back to Admin Dashboard</Link>
+    )}
+  </div>
+</nav>
 
       <div className={s.banner}>
         <div className={s.bannerStripe} />
@@ -213,6 +234,57 @@ export default function ProfilePage() {
                           {deletingId === car._id ? "Deleting…" : "Delete"}
                         </button>
                       </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className={s.mainHeader} style={{ marginTop: 32 }}>
+            <h3 className={s.mainTitle}>Cars You've Booked or Bought</h3>
+            {purchases.length > 0 && <span className={s.mainCount}>{purchases.length}</span>}
+          </div>
+
+          {purchasesLoading ? (
+            <div className={s.emptyState}>
+              <p className={s.emptyText}>Loading…</p>
+            </div>
+          ) : purchases.length === 0 ? (
+            <div className={s.emptyState}>
+              <div className={s.emptyIcon}>🔑</div>
+              <p className={s.emptyText}>You haven't booked or bought a vehicle yet.</p>
+              <Link href="/home" className={s.emptyCta}>Browse vehicles</Link>
+            </div>
+          ) : (
+            <div className={s.carsGrid}>
+              {purchases.map((car) => {
+                const displayStatus = getDisplayStatus(car);
+                const imgSrc = car.images?.[0]
+                  ? car.images[0].startsWith("http")
+                    ? car.images[0]
+                    : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${car.images[0]}`
+                  : "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80";
+
+                return (
+                  <div key={car._id} className={s.carCard}>
+                    <div className={s.carImg} style={{ backgroundImage: `url('${imgSrc}')` }}>
+                      <span className={`${s.statusBadge} ${s[`status_${displayStatus}`]}`}>
+                        {statusLabel[displayStatus]}
+                      </span>
+                    </div>
+                    <div className={s.carInfo}>
+                      <div className={s.carInfoTop}>
+                        <span className={s.carName}>{car.year} {car.make} {car.carModel}</span>
+                        <span className={s.carPrice}>
+                          Rs.{(car.soldPrice ?? car.price).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className={s.carSpecs}>
+                        {displayStatus === "sold"
+                          ? "Purchase complete"
+                          : `Deposit paid: Rs.${(car.depositAmount ?? 0).toLocaleString()}`}
+                      </p>
+                      <p className={s.carSpecs}>Seller: {car.sellerId?.fullName ?? "Unknown"}</p>
                     </div>
                   </div>
                 );

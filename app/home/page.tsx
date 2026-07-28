@@ -4,6 +4,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import s from "./home.module.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import NotificationBell from "@/app/components/notifications/NotificationBell";
 
 interface ApiCar {
   _id: string;
@@ -79,6 +80,7 @@ export default function HomePage() {
       .catch((err) => console.error("Failed to load cars", err));
   }, []);
   useEffect(() => {
+  if (!user) return;
   fetch("/api/cars/wishlist/mine", { credentials: "include" })
     .then((r) => r.json())
     .then((data) => {
@@ -87,7 +89,7 @@ export default function HomePage() {
       }
     })
     .catch((err) => console.error("Failed to load wishlist state", err));
-}, []);
+}, [user]);
 
   const filteredCars = cars.filter((car) => {
     const q = searchQuery.trim().toLowerCase();
@@ -100,7 +102,11 @@ export default function HomePage() {
     );
   });
   const handleToggleSave = async (e: React.MouseEvent, carId: string) => {
-    e.stopPropagation();
+  e.stopPropagation();
+  if (!user) {
+    router.push("/login");
+    return;
+  }
     try {
       const res = await fetch(`/api/cars/${carId}/save`, {
         method: "POST",
@@ -117,14 +123,7 @@ export default function HomePage() {
       console.error("Failed to toggle save", err);
     }
   };
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
-    }
-  }, [user, loading, router]);
-
-  if (loading || !user) return null;
+  if (loading) return null;
   console.log("current user:", user);
 
   return (
@@ -134,11 +133,16 @@ export default function HomePage() {
 
         <div className={s.navBrand}>VIBES</div>
         <div className={s.navLinks}>
-          <Link href="/" className={`${s.navLink} ${s.navLinkActive}`}>Buy</Link>
-          <Link href="/sell" className={s.navLink}>Sell</Link>
-        </div>
+  <Link href="/" className={`${s.navLink} ${s.navLinkActive}`}>Buy</Link>
+  <Link href="/sell" className={s.navLink}>Sell</Link>
+  <Link href="/about" className={s.navLink}>About</Link>
+</div>
         <div className={s.navRight}>
-          <button className={s.iconBtn} aria-label="Notifications">🔔</button>
+          {user ? (
+  <NotificationBell />
+) : (
+  <span className={s.iconBtn}>🔔</span>
+)}
           <Link href="/wishlist" className={s.iconBtn} aria-label="Wishlist">🤍</Link>
           {user ? (
             <Link href="/profile" className={s.btnAccount}>
@@ -236,7 +240,13 @@ export default function HomePage() {
             <div
               key={car._id}
               className={s.carCard}
-              onClick={() => router.push(`/cars/${car._id}`)}
+              onClick={() => {
+  if (!user) {
+    router.push("/login");
+    return;
+  }
+  router.push(`/cars/${car._id}`);
+}}
             >
               <div
                 className={s.carImg}
