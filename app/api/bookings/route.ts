@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   try {
     const body = await req.json();
-    const res = await fetch(`${API_BASE}/api/bookings`, {
+    const res = await fetch(`${API_BASE}/api/v1/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),

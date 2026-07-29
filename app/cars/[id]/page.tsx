@@ -217,7 +217,6 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
               <div className={s.priceValue}>Rs.{car.price.toLocaleString()}</div>
 
               <button className={s.btnBuyNow} onClick={() => router.push(`/cars/${car._id}/book`)}>Buy Now</button>
-              <button className={s.btnMessage}>💬 Message Seller</button>
             </div>
 
             {/* Seller card */}

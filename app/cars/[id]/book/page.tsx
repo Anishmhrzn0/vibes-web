@@ -26,22 +26,22 @@ export default function BookCarPage({ params }: { params: Promise<{ id: string }
   }, [formData]);
 
   const handleBook = async () => {
-    setStarting(true);
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ carId }),
-      });
-      if (!res.ok) throw new Error("Failed to start booking");
-      const data = await res.json();
-      setFormData({ form: data.esewaForm, gatewayUrl: data.gatewayUrl });
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to start booking");
-      setStarting(false);
-    }
-  };
+  setStarting(true);
+  try {
+    const res = await fetch("/api/bookings", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ carId }),
+    });
+    if (!res.ok) throw new Error("Failed to start booking");
+    const data = await res.json();
+    window.location.href = data.paymentUrl;
+  } catch (err) {
+    alert(err instanceof Error ? err.message : "Failed to start booking");
+    setStarting(false);
+  }
+};
 
   if (authLoading || !user) return null;
 
